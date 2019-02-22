@@ -3,6 +3,7 @@
   "repository": "abendigo/convert",
   "license": "Unlicense",
   "scripts": {
+    "start": "http-server dist",
     "build": "copy-node-modules . dist && copyfiles *.html *.js manifest.json dist"
   },
   "cypress-cucumber-preprocessor": {
