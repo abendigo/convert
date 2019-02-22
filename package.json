@@ -1,0 +1,6 @@
+{
+  "name": "convert",
+  "scripts": {
+    "build": "echo 'Building...'"
+  }
+}
