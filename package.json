@@ -2,5 +2,8 @@
   "name": "convert",
   "scripts": {
     "build": "echo 'Building...'"
+  },
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.2.4"
   }
 }
