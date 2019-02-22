@@ -1,5 +1,5 @@
 
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c72a9c8f-a53f-41bd-8365-81a650d58446/deploy-status)](https://app.netlify.com/sites/mystifying-wilson-e3f8c2/deploys)
 
 using [https://exchangeratesapi.io/][exchangeratesapi].
 
