@@ -4,7 +4,7 @@
   "license": "Unlicense",
   "scripts": {
     "start": "http-server dist",
-    "build": "copy-node-modules . dist && copyfiles *.html *.js manifest.json dist"
+    "build": "copy-node-modules . dist && copyfiles src/* -u 1 dist"
   },
   "cypress-cucumber-preprocessor": {
     "nonGlobalStepDefinitions": true
