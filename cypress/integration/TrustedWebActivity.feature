@@ -1,8 +1,13 @@
 Feature: Trusted Web Activity
 
-  Scenario: Must have a Manifest
+  Background:
     Given I have loaded the app
+
+  Scenario: Must have a Manifest
     Then It should have a manifest
+
+    Scenario: Manifest must ...
+      When I load the manifest
 
   Scenario: Must have Digital Assets Links
     Then I can load assetlinks.json
