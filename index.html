@@ -3,21 +3,22 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="Description" content="Convert USD GBP EUR CAD" />
+    <meta name="description" content="Convert USD GBP EUR CAD" />
 
     <title>Simple Currency Converter</title>
 
+    <link rel="icon" href="images/favicon.ico" />
     <link rel="manifest" href="manifest.json" />
 
     <script>
       // Load and register pre-caching Service Worker
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function() {
-          navigator.serviceWorker.register("service-worker.js", {
-            scope: "/"
-          });
-        });
-      }
+      // if ("serviceWorker" in navigator) {
+      //   window.addEventListener("load", function() {
+      //     navigator.serviceWorker.register("service-worker.js", {
+      //       scope: "/"
+      //     });
+      //   });
+      // }
 
       // // Redux assumes `process.env.NODE_ENV` exists in the ES module build.
       // // https://github.com/reactjs/redux/issues/2907
