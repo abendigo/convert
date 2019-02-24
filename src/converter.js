@@ -15,6 +15,8 @@ class SimpleCurrencyConverter extends LitElement {
 
     this.amount = 100;
 
+    // https://api.exchangeratesapi.io/latest?base=CAD
+
     this.data = {
       base: "CAD",
       date: "2019-02-15",
