@@ -1,13 +1,21 @@
 {
   "name": "Simple Currency Converter",
-  "short_name": "convert",
+  "short_name": "Convert",
   "icons": [
     {
       "src": "launcher-icon.png",
       "sizes": "192x192",
       "type": "image/png"
+    },
+    {
+      "src": "launcher-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "start_url": "/",
-  "disp-lay": "standalone"
+  "display": "standalone",
+
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
 }
