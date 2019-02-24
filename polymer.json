@@ -18,7 +18,8 @@
       "html": {
         "minify": false
       },
-      "bundle": false
+      "bundle": false,
+      "addServiceWorker": true
     }
   ],
   "moduleResolution": "node",
