@@ -3,19 +3,18 @@
   "short_name": "Convert",
   "icons": [
     {
-      "src": "launcher-icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "images/manifest/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
     },
     {
-      "src": "launcher-icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "images/manifest/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
   "start_url": "/",
   "display": "standalone",
-
   "background_color": "#ffffff",
   "theme_color": "#ffffff"
 }

@@ -27,7 +27,36 @@
 
   <body>
     <simple-currency-converter>
-      Simple Currency Converter
+      <h2>Simple Currency Converter</h2>
+
+      <section>
+        $100 CAD
+        <ul>
+          <li>$90 USD</li>
+          <li>$100 AUD</li>
+        </ul>
+      </section>
+      <section>
+        $100 USD
+        <ul>
+          <li>$120 CAD</li>
+        </ul>
+      </section>
+      <section>
+        $100 AUD
+        <ul>
+          <li>$100 CAD</li>
+        </ul>
+      </section>
+
+      <footer>
+        Rates from
+        <a
+          href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+          >European Central Bank</a
+        >, via <a href="https://exchangeratesapi.io/">exchangeratesapi.io</a>,
+        as of 2019/02/21 09:32:00 EDT.
+      </footer>
     </simple-currency-converter>
 
     <!-- <noscript>
@@ -35,8 +64,8 @@
     </noscript> -->
 
     <!-- Load webcomponents-loader.js to check and load any polyfills your browser needs -->
-    <!-- <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script> -->
+    <script src="node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
 
-    <!-- <script type="module" src="converter.js"></script> -->
+    <!-- <script type="module" src="src/converter.js"></script> -->
   </body>
 </html>
