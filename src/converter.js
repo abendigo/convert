@@ -17,6 +17,8 @@ class SimpleCurrencyConverter extends LitElement {
     this.base = "CAD";
     this.rates = {};
 
+    this.locale = "en-CA";
+
     fetch(
       "https://api.exchangeratesapi.io/latest?base=CAD&symbols=USD,GBP,EUR,THB,AUD"
     )
@@ -29,10 +31,10 @@ class SimpleCurrencyConverter extends LitElement {
 
   render() {
     return html`
-      <h2>Simple Currency Converter</h2>
+      <h2>Simple Currency Converter (${this.base})</h2>
 
       <section>
-        ${this.amount.toLocaleString(undefined, {
+        ${this.amount.toLocaleString(this.locale, {
           style: "currency",
           currency: this.base
         })}
@@ -41,9 +43,17 @@ class SimpleCurrencyConverter extends LitElement {
             i =>
               html`
                 <li>
-                  ${(this.amount * this.rates[i]).toLocaleString(undefined, {
+                  ${(this.amount * this.rates[i]).toLocaleString(this.locale, {
                     style: "currency",
                     currency: i
+                  })}
+                  ${this.amount.toLocaleString(this.locale, {
+                    style: "currency",
+                    currency: i
+                  })}
+                  ${(this.amount / this.rates[i]).toLocaleString(this.locale, {
+                    style: "currency",
+                    currency: this.base
                   })}
                 </li>
               `
@@ -57,13 +67,25 @@ class SimpleCurrencyConverter extends LitElement {
             j => html`
               <tr>
                 <td>
-                  ${this.amount.toLocaleString(undefined, {
+                  ${this.amount.toLocaleString(this.locale, {
+                    style: "currency",
+                    currency: this.base
+                  })}
+                </td>
+                <td>
+                  ${(this.amount * this.rates[j]).toLocaleString(this.locale, {
                     style: "currency",
                     currency: j
                   })}
                 </td>
                 <td>
-                  ${(this.amount / this.rates[j]).toLocaleString(undefined, {
+                  ${this.amount.toLocaleString(this.locale, {
+                    style: "currency",
+                    currency: j
+                  })}
+                </td>
+                <td>
+                  ${(this.amount / this.rates[j]).toLocaleString(this.locale, {
                     style: "currency",
                     currency: this.base
                   })}
