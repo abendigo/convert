@@ -29,42 +29,23 @@ class SimpleCurrencyConverter extends LitElement {
       });
   }
 
+  // static styles = css`
+  //   table: {
+  //     border: 3px solid purple;
+  //   }
+  // `;
+
   render() {
     return html`
       <h2>Simple Currency Converter (${this.base})</h2>
 
-      <section>
-        ${this.amount.toLocaleString(this.locale, {
-          style: "currency",
-          currency: this.base
-        })}
-        <ul>
-          ${Object.keys(this.rates).map(
-            i =>
-              html`
-                <li>
-                  ${(this.amount * this.rates[i]).toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: i
-                  })}
-                  ${this.amount.toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: i
-                  })}
-                  ${(this.amount / this.rates[i]).toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: this.base
-                  })}
-                </li>
-              `
-          )}
-        </ul>
-      </section>
-
-      <section>
-        <table>
-          ${Object.keys(this.rates).map(
-            j => html`
+      <table>
+        <tr>
+          <td colspan="2">My Buying Power</td>
+        </tr>
+        ${Object.keys(this.rates).map(
+          currency =>
+            html`
               <tr>
                 <td>
                   ${this.amount.toLocaleString(this.locale, {
@@ -73,28 +54,43 @@ class SimpleCurrencyConverter extends LitElement {
                   })}
                 </td>
                 <td>
-                  ${(this.amount * this.rates[j]).toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: j
-                  })}
-                </td>
-                <td>
-                  ${this.amount.toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: j
-                  })}
-                </td>
-                <td>
-                  ${(this.amount / this.rates[j]).toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: this.base
-                  })}
+                  ${(this.amount * this.rates[currency]).toLocaleString(
+                    this.locale,
+                    {
+                      style: "currency",
+                      currency: currency
+                    }
+                  )}
                 </td>
               </tr>
             `
-          )}
-        </table>
-      </section>
+        )}
+        <tr>
+          <td colspan="2">What does it cost?</td>
+        </tr>
+        ${Object.keys(this.rates).map(
+          currency =>
+            html`
+              <tr>
+                <td>
+                  ${this.amount.toLocaleString(this.locale, {
+                    style: "currency",
+                    currency: currency
+                  })}
+                </td>
+                <td>
+                  ${(this.amount / this.rates[currency]).toLocaleString(
+                    this.locale,
+                    {
+                      style: "currency",
+                      currency: this.base
+                    }
+                  )}
+                </td>
+              </tr>
+            `
+        )}
+      </table>
 
       <footer>
         Rates from
