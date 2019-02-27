@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit-element";
+import { LitElement, html, css } from "lit-element";
 
 class SimpleCurrencyConverter extends LitElement {
   static get properties() {
@@ -29,11 +29,32 @@ class SimpleCurrencyConverter extends LitElement {
       });
   }
 
-  // static styles = css`
-  //   table: {
-  //     border: 3px solid purple;
-  //   }
-  // `;
+  static get styles() {
+    return css`
+      table,
+      th,
+      td {
+        max-width: 400px;
+        width: 100%;
+      }
+      td {
+        text-align: right;
+        font-size: x-large;
+      }
+
+      .heading {
+        text-align: center;
+        padding: 20px 0;
+        font-size: xx-large;
+      }
+
+      footer {
+        font-size: small;
+        padding-top: 50px;
+        text-align: center;
+      }
+    `;
+  }
 
   render() {
     return html`
@@ -41,17 +62,19 @@ class SimpleCurrencyConverter extends LitElement {
 
       <table>
         <tr>
-          <td colspan="2">My Buying Power</td>
+          <td colspan="2" class="heading">My Buying Power</td>
         </tr>
         ${Object.keys(this.rates).map(
-          currency =>
+          (currency, index) =>
             html`
               <tr>
                 <td>
-                  ${this.amount.toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: this.base
-                  })}
+                  ${index === 0
+                    ? this.amount.toLocaleString(this.locale, {
+                        style: "currency",
+                        currency: this.base
+                      })
+                    : ""}
                 </td>
                 <td>
                   ${(this.amount * this.rates[currency]).toLocaleString(
@@ -66,7 +89,7 @@ class SimpleCurrencyConverter extends LitElement {
             `
         )}
         <tr>
-          <td colspan="2">What does it cost?</td>
+          <td colspan="2" class="heading">What does it cost?</td>
         </tr>
         ${Object.keys(this.rates).map(
           currency =>
