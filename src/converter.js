@@ -31,21 +31,23 @@ class SimpleCurrencyConverter extends LitElement {
 
   static get styles() {
     return css`
-      table,
-      th,
-      td {
+      h2 {
+        text-align: center;
+      }
+
+      table {
         max-width: 400px;
         width: 100%;
       }
       td {
         text-align: right;
-        font-size: x-large;
+        font-size: large;
       }
 
       .heading {
         text-align: center;
         padding: 20px 0;
-        font-size: xx-large;
+        font-size: x-large;
       }
 
       footer {
@@ -58,11 +60,11 @@ class SimpleCurrencyConverter extends LitElement {
 
   render() {
     return html`
-      <h2>Simple Currency Converter (${this.base})</h2>
+      <h2>Simple Currency Converter</h2>
 
       <table>
         <tr>
-          <td colspan="2" class="heading">My Buying Power</td>
+          <td colspan="2" class="heading">My ${this.base} Buying Power</td>
         </tr>
         ${Object.keys(this.rates).map(
           (currency, index) =>
