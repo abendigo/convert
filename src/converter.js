@@ -1,5 +1,7 @@
 import { LitElement, html, css } from "lit-element";
 
+// import xxx from './xxx.html';
+
 class SimpleCurrencyConverter extends LitElement {
   static get properties() {
     return {
@@ -31,91 +33,72 @@ class SimpleCurrencyConverter extends LitElement {
 
   static get styles() {
     return css`
-      h2 {
-        text-align: center;
-      }
-
-      table {
-        max-width: 400px;
-        width: 100%;
-      }
-      td {
-        text-align: right;
-        font-size: large;
-      }
-
-      .heading {
-        text-align: center;
-        padding: 20px 0;
-        font-size: x-large;
-      }
-
-      footer {
-        font-size: small;
-        padding-top: 50px;
-        text-align: center;
-      }
+      @import "src/converter.css";
     `;
   }
 
   render() {
+    // console.log('xxx', xxx);
+
     return html`
       <h2>Simple Currency Converter</h2>
 
-      <table>
-        <tr>
-          <td colspan="2" class="heading">My ${this.base} Buying Power</td>
-        </tr>
-        ${Object.keys(this.rates).map(
-          (currency, index) =>
-            html`
-              <tr>
-                <td>
-                  ${index === 0
-                    ? this.amount.toLocaleString(this.locale, {
+      <div class="container">
+        <table>
+          <tr>
+            <td colspan="2" class="heading">My ${this.base} Buying Power</td>
+          </tr>
+          ${Object.keys(this.rates).map(
+            (currency, index) =>
+              html`
+                <tr>
+                  <td>
+                    ${index === 0
+                      ? this.amount.toLocaleString(this.locale, {
+                          style: "currency",
+                          currency: this.base
+                        })
+                      : ""}
+                  </td>
+                  <td>
+                    ${(this.amount * this.rates[currency]).toLocaleString(
+                      this.locale,
+                      {
                         style: "currency",
-                        currency: this.base
-                      })
-                    : ""}
-                </td>
-                <td>
-                  ${(this.amount * this.rates[currency]).toLocaleString(
-                    this.locale,
-                    {
+                        currency: currency
+                      }
+                    )}
+                  </td>
+                </tr>
+              `
+          )}
+          <tr>
+            <td colspan="2" class="heading">What does it cost?</td>
+          </tr>
+          ${Object.keys(this.rates).map(
+            currency =>
+              html`
+                <tr>
+                  <td>
+                    ${this.amount.toLocaleString(this.locale, {
                       style: "currency",
                       currency: currency
-                    }
-                  )}
-                </td>
-              </tr>
-            `
-        )}
-        <tr>
-          <td colspan="2" class="heading">What does it cost?</td>
-        </tr>
-        ${Object.keys(this.rates).map(
-          currency =>
-            html`
-              <tr>
-                <td>
-                  ${this.amount.toLocaleString(this.locale, {
-                    style: "currency",
-                    currency: currency
-                  })}
-                </td>
-                <td>
-                  ${(this.amount / this.rates[currency]).toLocaleString(
-                    this.locale,
-                    {
-                      style: "currency",
-                      currency: this.base
-                    }
-                  )}
-                </td>
-              </tr>
-            `
-        )}
-      </table>
+                    })}
+                  </td>
+                  <td>
+                    ${(this.amount / this.rates[currency]).toLocaleString(
+                      this.locale,
+                      {
+                        style: "currency",
+                        currency: this.base
+                      }
+                    )}
+                  </td>
+                </tr>
+              `
+          )}
+        </table>
+      </div>
 
       <footer>
         Rates from

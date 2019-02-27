@@ -3,7 +3,8 @@
   "sources": ["images/**/*"],
   "extraDependencies": [
     "manifest.json",
-    "node_modules/@webcomponents/webcomponentsjs/**"
+    "node_modules/@webcomponents/webcomponentsjs/**",
+    "src/*.css"
   ],
   "builds": [
     {
