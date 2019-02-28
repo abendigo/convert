@@ -4,6 +4,7 @@
   "extraDependencies": [
     "manifest.json",
     "node_modules/@webcomponents/webcomponentsjs/**",
+    ".well-known/assetlinks.json",
     "src/*.css"
   ],
   "builds": [

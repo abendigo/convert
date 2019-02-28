@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "blog.frustraded.twa.convert",
+      "sha256_cert_fingerprints": [
+        "43:21:D3:D6:84:74:6C:FD:50:0C:53:7E:17:BD:DC:93:83:B2:B5:FC:DE:B4:24:B5:E2:4A:7B:17:F7:8E:7E:83"
+      ]
+    }
+  }
+]
