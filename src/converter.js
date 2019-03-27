@@ -33,7 +33,36 @@ class SimpleCurrencyConverter extends LitElement {
 
   static get styles() {
     return css`
-      @import "src/converter.css";
+      h2 {
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        justify-content: center;
+      }
+
+      table {
+        max-width: 400px;
+        width: 100%;
+        padding: 10px;
+      }
+      td {
+        text-align: right;
+        font-size: large;
+      }
+
+      .heading {
+        text-align: center;
+        padding: 20px 0;
+        font-size: x-large;
+      }
+
+      footer {
+        font-size: small;
+        padding-top: 50px;
+        text-align: center;
+      }
     `;
   }
 
