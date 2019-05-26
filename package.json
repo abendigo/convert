@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@webcomponents/webcomponentsjs": "^2.2.4",
+    "idb-keyval": "^3.2.0",
     "lit-element": "^2.1.0"
   },
   "devDependencies": {

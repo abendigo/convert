@@ -1,6 +1,5 @@
 import { LitElement, html, css } from "lit-element";
-
-// import xxx from './xxx.html';
+import { get, set } from "idb-keyval";
 
 class SimpleCurrencyConverter extends LitElement {
   static get properties() {
@@ -15,20 +14,30 @@ class SimpleCurrencyConverter extends LitElement {
   constructor() {
     super();
 
-    this.amount = 100;
-    this.base = "CAD";
-    this.rates = {};
-
-    this.locale = "en-CA";
+    get("date").then(date => {
+      if (date) this.date = date;
+    });
+    get("rates").then(rates => {
+      if (rates) this.rates = rates;
+    });
 
     fetch(
       "https://api.exchangeratesapi.io/latest?base=CAD&symbols=USD,GBP,EUR,THB,AUD"
     )
       .then(response => response.json())
       .then(json => {
+        set("rates", json.rates);
+        set("date", json.date);
         this.rates = json.rates;
         this.date = json.date;
       });
+    // });
+
+    this.amount = 100;
+    this.base = "CAD";
+    this.rates = {};
+
+    this.locale = "en-CA";
   }
 
   static get styles() {
@@ -67,8 +76,6 @@ class SimpleCurrencyConverter extends LitElement {
   }
 
   render() {
-    // console.log('xxx', xxx);
-
     return html`
       <h2>Simple Currency Converter</h2>
 
