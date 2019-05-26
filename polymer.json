@@ -12,7 +12,7 @@
       "name": "default",
       "browserCapabilities": ["es2015", "modules"],
       "js": {
-        "minify": false
+        "minify": true
       },
       "css": {
         "minify": false
@@ -20,7 +20,7 @@
       "html": {
         "minify": false
       },
-      "bundle": false,
+      "bundle": true,
       "addServiceWorker": true
     }
   ],
