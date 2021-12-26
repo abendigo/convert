@@ -1,6 +1,54 @@
 import { LitElement, html, css } from "lit-element";
 import { get, set } from "idb-keyval";
 
+// Copied from https://gist.github.com/chinchang/8106a82c56ad007e27b1
+function xmlToJson(xml) {
+  // Create the return object
+  var obj = {};
+
+  if (xml.nodeType == 1) {
+    // element
+    // do attributes
+    if (xml.attributes.length > 0) {
+      obj["@attributes"] = {};
+      for (var j = 0; j < xml.attributes.length; j++) {
+        var attribute = xml.attributes.item(j);
+        obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+      }
+    }
+  } else if (xml.nodeType == 3) {
+    // text
+    obj = xml.nodeValue;
+  }
+
+  // do children
+  // If all text nodes inside, get concatenated text from them.
+  var textNodes = [].slice.call(xml.childNodes).filter(function(node) {
+    return node.nodeType === 3;
+  });
+  if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
+    obj = [].slice.call(xml.childNodes).reduce(function(text, node) {
+      return text + node.nodeValue;
+    }, "");
+  } else if (xml.hasChildNodes()) {
+    for (var i = 0; i < xml.childNodes.length; i++) {
+      var item = xml.childNodes.item(i);
+      var nodeName = item.nodeName;
+      if (typeof obj[nodeName] == "undefined") {
+        obj[nodeName] = xmlToJson(item);
+      } else {
+        if (typeof obj[nodeName].push == "undefined") {
+          var old = obj[nodeName];
+          obj[nodeName] = [];
+          obj[nodeName].push(old);
+        }
+        obj[nodeName].push(xmlToJson(item));
+      }
+    }
+  }
+  return obj;
+}
+
 class SimpleCurrencyConverter extends LitElement {
   static get properties() {
     return {
@@ -21,23 +69,27 @@ class SimpleCurrencyConverter extends LitElement {
       if (rates) this.rates = rates;
     });
 
-    fetch(
-      "https://api.exchangeratesapi.io/latest?base=CAD&symbols=USD,GBP,EUR,THB,AUD"
-    )
-      .then(response => response.json())
+    fetch("https://red-band-e7de.pokerdiary.workers.dev/")
+      .then(response => response.text())
+      .then(xmlString => new DOMParser().parseFromString(xmlString, "text/xml"))
+      .then(xmlNode => xmlToJson(xmlNode))
       .then(json => {
-        set("rates", json.rates);
-        set("date", json.date);
-        this.rates = json.rates;
-        this.date = json.date;
+        const data = json["gesmes:Envelope"].Cube.Cube;
+        this.date = data["@attributes"].time;
+
+        this.rates = data.Cube.reduce((rates, item) => {
+          const { currency, rate } = item["@attributes"];
+          rates[currency] = rate;
+          return rates;
+        }, {});
       });
-    // });
 
     this.amount = 100;
-    this.base = "CAD";
+    this.base = "EUR";
     this.rates = {};
 
-    this.locale = "en-CA";
+    this.currencies = ["CAD", "USD", "GBP", "THB", "AUD"];
+    this.locale = "en-GB";
   }
 
   static get styles() {
@@ -84,7 +136,7 @@ class SimpleCurrencyConverter extends LitElement {
           <tr>
             <td colspan="2" class="heading">My ${this.base} Buying Power</td>
           </tr>
-          ${Object.keys(this.rates).map(
+          ${this.currencies.map(
             (currency, index) =>
               html`
                 <tr>
@@ -111,7 +163,7 @@ class SimpleCurrencyConverter extends LitElement {
           <tr>
             <td colspan="2" class="heading">What does it cost?</td>
           </tr>
-          ${Object.keys(this.rates).map(
+          ${this.currencies.map(
             currency =>
               html`
                 <tr>
@@ -141,8 +193,7 @@ class SimpleCurrencyConverter extends LitElement {
         <a
           href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
           >European Central Bank</a
-        >, via <a href="https://exchangeratesapi.io/">exchangeratesapi.io</a>,
-        as of ${this.date}.
+        >, as of ${this.date}.
       </footer>
     `;
   }
