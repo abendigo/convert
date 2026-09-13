@@ -126,12 +126,15 @@ Wordle-style vanity share (nobody shares a currency conversion as an achievement
 realistic trigger is someone mid-decision wanting to send an actual number to whoever
 they're deciding with. Built accordingly:
 
-- **What's shared**: each currency's name in the table is a real `<a>` link to that
-  specific base→target conversion, not a custom gesture. Long-press on it gets the
+- **What's shared**: a row carries two distinct facts (Buying power, Cost), so each
+  value cell — not the currency name — is its own real `<a>` link, carrying a `kind`
+  ("buying"/"cost") in the URL so the landing page uses the matching verb ("100 CAD
+  **buys** $73.47 USD" vs. "100 USD **costs** $136.11 CAD") instead of a flat "=" that
+  loses which question was actually being answered. Long-press either number gets the
   native OS share sheet **for free** — no gesture-detection code, no taught hint needed,
   because it's just how browsers already treat any link. A normal tap still selects that
   row as base as before (`preventDefault`'d so it doesn't navigate); long-press bypasses
-  our JS entirely at the OS level, so both behaviors coexist on the same element.
+  our JS entirely at the OS level, so both behaviors coexist on the same elements.
 - **Values are static, not live**: the actual computed value is baked into the URL
   itself (`?amount=100&from=CAD&to=USD&value=73.47&date=2026-09-13`), not just the
   inputs to a recalculation. Whoever opens the link — a day or a year later — sees

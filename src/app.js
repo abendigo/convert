@@ -86,14 +86,17 @@ function xmlToJson(xml) {
 
   // a shared link freezes the actual computed value into the URL, not just
   // the inputs — so whoever opens it later sees exactly what was shared,
-  // never a different (live-recalculated) number
-  function shareHref(fromCode, toCode, amt, value) {
+  // never a different (live-recalculated) number. `kind` ("buying" or
+  // "cost") carries which of the row's two facts this is, so the landing
+  // page can use the matching verb instead of a flat "=".
+  function shareHref(fromCode, toCode, amt, value, kind) {
     var params = new URLSearchParams({
       amount: amt,
       from: fromCode,
       to: toCode,
       value: value.toFixed(2),
-      date: date
+      date: date,
+      kind: kind
     });
     return location.pathname + "?" + params.toString();
   }
@@ -191,12 +194,14 @@ function xmlToJson(xml) {
       var tr = document.createElement("tr");
       tr.dataset.code = code;
       tr.innerHTML =
-        '<td><a class="cur-link" href="' + shareHref(base, code, amount, buying) + '">' +
-          '<span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span>" +
+        '<td><span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span></td>" +
+        '<td class="col-buying"><a class="share-link" href="' + shareHref(base, code, amount, buying, "buying") + '">' +
+          formatCurrency(buying, code) +
         "</a></td>" +
-        '<td class="col-buying">' + formatCurrency(buying, code) + "</td>" +
-        '<td class="col-cost"><div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
-        '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div></td>";
+        '<td class="col-cost"><a class="share-link" href="' + shareHref(code, base, amount, costBase, "cost") + '">' +
+          '<div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
+          '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div>" +
+        "</a></td>";
       tbody.appendChild(tr);
     });
   }
@@ -233,7 +238,7 @@ function xmlToJson(xml) {
     // a normal tap still selects the base (don't navigate the real link
     // away); a long-press bypasses this entirely — the OS intercepts it
     // before any click ever fires, showing its native share menu instead
-    var link = e.target.closest("a.cur-link");
+    var link = e.target.closest("a.share-link");
     if (link) e.preventDefault();
     var tr = e.target.closest("tr");
     if (tr && tr.dataset.code) selectBase(tr.dataset.code);
@@ -476,14 +481,17 @@ function xmlToJson(xml) {
       from: p.get("from"),
       to: p.get("to"),
       value: parseFloat(p.get("value")),
-      date: p.get("date")
+      date: p.get("date"),
+      kind: p.get("kind") === "cost" ? "cost" : "buying" // default covers older/malformed links
     };
   }
 
   var shared = parseShareParams();
 
   if (shared) {
-    var pair = formatCurrency(Number(shared.amount), shared.from) + " = " + formatCurrency(shared.value, shared.to);
+    var verb = shared.kind === "cost" ? "costs" : "buys";
+    var pair =
+      formatCurrency(Number(shared.amount), shared.from) + " " + verb + " " + formatCurrency(shared.value, shared.to);
     document.getElementById("snapshotPair").textContent = pair;
     document.getElementById("snapshotAsOf").textContent = "as of " + formatDateYMD(shared.date);
     document.getElementById("liveView").hidden = true;
