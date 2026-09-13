@@ -1,3 +1,2 @@
 [build]
-  publish = "build/default"
-  command = "npm run build"
+  publish = "."

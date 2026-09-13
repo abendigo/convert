@@ -3,11 +3,7 @@
   "repository": "abendigo/convert",
   "license": "Unlicense",
   "scripts": {
-    "start": "polymer serve",
-    "build": "polymer build"
-  },
-  "cypress-cucumber-preprocessor": {
-    "nonGlobalStepDefinitions": true
+    "start": "npx --yes serve ."
   },
   "husky": {
     "hooks": {
@@ -15,16 +11,10 @@
     }
   },
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.2.4",
-    "idb-keyval": "^3.2.0",
-    "lit-element": "^2.1.0"
+    "idb-keyval": "^3.2.0"
   },
   "devDependencies": {
-    "cypress": "^3.2.0",
-    "cypress-cucumber-preprocessor": "^1.11.0",
     "husky": "^1.3.1",
-    "polymer-cli": "^1.9.7",
-    "polyserve": "^0.27.15",
     "prettier": "1.16.4",
     "pretty-quick": "^1.10.0"
   }

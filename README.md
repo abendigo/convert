@@ -2,15 +2,25 @@
 
 # Technology Choices
 
-- using [https://exchangeratesapi.io/][exchangeratesapi] for rates.
-- using [Prettier][prettier], [PrettyQuick][pretty-quick], and [Husky][husky] for code standards.
-- using [Netlify][netlify] for CI and Hosting.
-- using [Cypress][cypress] and [Cucumber][cucumber] for tests.
+- No framework — plain JS/CSS/HTML, no build step. Static files, served as-is.
+- Rates come from the [European Central Bank][ecb] daily reference rates, fetched
+  client-side through a Cloudflare Worker proxy (works around the ECB endpoint not
+  sending CORS headers). The worker itself lives outside this repo.
+- [idb-keyval][idb-keyval] caches the last-fetched rates locally, so the app has
+  something to show before the network request resolves.
+- Using [Prettier][prettier], [PrettyQuick][pretty-quick], and [Husky][husky] for code
+  standards.
+- Using [Netlify][netlify] for CI and hosting.
+- No automated tests at the moment. If added later: [Playwright][playwright], not
+  Cypress.
 
-[exchangeratesapi]: https://exchangeratesapi.io/
+See `REDESIGN.md` for the fuller set of design and implementation decisions behind the
+current version.
+
+[ecb]: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html
+[idb-keyval]: https://github.com/jakearchibald/idb-keyval
 [prettier]: https://prettier.io/
 [pretty-quick]: https://github.com/azz/pretty-quick
 [husky]: https://github.com/typicode/husky
 [netlify]: https://www.netlify.com/
-[cypress]: https://www.cypress.io/
-[cucumber]: https://cucumber.io/
+[playwright]: https://playwright.dev/

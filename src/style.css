@@ -1,0 +1,308 @@
+:root {
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --surface-2: #eceef4;
+  --ink: #12141c;
+  --ink-muted: #5b6472;
+  --accent: #1b3a8a;
+  --hairline: #dadfea;
+  --focus: #1b3a8a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0e14;
+    --surface: #12151f;
+    --surface-2: #171b27;
+    --ink: #e9ebf2;
+    --ink-muted: #8b93a7;
+    --accent: #7c9cff;
+    --hairline: #232838;
+    --focus: #7c9cff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* the app frame: card pinned top, footer pinned bottom, only the
+   currency list scrolls in between */
+.page {
+  width: 100%;
+  max-width: 420px;
+  height: 100dvh;
+  max-height: 780px;
+  min-height: 480px;
+  padding: 24px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wordmark {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* ---- swipe stage ---- */
+
+.stage {
+  flex-shrink: 0;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  padding: 38px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+.stage:active {
+  cursor: grabbing;
+}
+.stage:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.hero-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 104px;
+  overflow: hidden;
+}
+
+.hero {
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.amount-figure {
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.currency-line {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.currency-code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+}
+
+.currency-sep {
+  color: var(--hairline);
+  font-size: 0.8rem;
+}
+
+.currency-name {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.chev {
+  position: absolute;
+  color: var(--accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.1rem;
+  opacity: 0;
+  pointer-events: none;
+  animation: hintPulse 2.6s ease-in-out 0.5s 1;
+  z-index: 2;
+}
+.chev-left {
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation-name: hintPulseX;
+}
+.chev-right {
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation-name: hintPulseX;
+  animation-direction: reverse;
+}
+.chev-up {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.chev-down {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes hintPulse {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes hintPulseX {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(0);
+  }
+  35% {
+    opacity: 0.85;
+    transform: translateY(-50%) translateX(-3px);
+  }
+  70% {
+    opacity: 0.85;
+    transform: translateY(-50%) translateX(-3px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+.chev-up,
+.chev-down {
+  animation-name: hintPulse;
+}
+
+/* ---- rates table (the only part of the app that scrolls) ---- */
+
+.page-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table.rates {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.rates thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  text-align: right;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--hairline);
+}
+table.rates thead th:first-child {
+  text-align: left;
+}
+
+table.rates td {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  vertical-align: top;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+}
+table.rates tr:last-child td {
+  border-bottom: none;
+}
+table.rates tbody tr {
+  cursor: pointer;
+}
+table.rates tbody tr:active {
+  background: var(--surface-2);
+}
+table.rates td:first-child {
+  text-align: left;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+.cur-code {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.cur-name {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+.col-buying {
+  color: var(--ink);
+  font-weight: 600;
+}
+.cost-value {
+  font-weight: 600;
+  color: var(--ink);
+}
+.cost-of {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+footer {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+footer a {
+  color: var(--ink-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chev {
+    animation: none !important;
+  }
+}
