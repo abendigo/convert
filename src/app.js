@@ -84,19 +84,18 @@ function xmlToJson(xml) {
     return iso.replace(/-/g, "/");
   }
 
-  // a shared link freezes the actual computed value into the URL, not just
-  // the inputs — so whoever opens it later sees exactly what was shared,
-  // never a different (live-recalculated) number. `kind` ("buying" or
-  // "cost") carries which of the row's two facts this is, so the landing
-  // page can use the matching verb instead of a flat "=".
-  function shareHref(fromCode, toCode, amt, value, kind) {
+  // a shared link freezes the row's two actual computed values into the
+  // URL, not just the inputs — so whoever opens it later sees exactly what
+  // was shared, never different (live-recalculated) numbers. Both facts
+  // travel together because the row shows them together.
+  function shareHref(fromCode, toCode, amt, buyingValue, costValue) {
     var params = new URLSearchParams({
       amount: amt,
       from: fromCode,
       to: toCode,
-      value: value.toFixed(2),
-      date: date,
-      kind: kind
+      buying: buyingValue.toFixed(2),
+      cost: costValue.toFixed(2),
+      date: date
     });
     return location.pathname + "?" + params.toString();
   }
@@ -194,14 +193,12 @@ function xmlToJson(xml) {
       var tr = document.createElement("tr");
       tr.dataset.code = code;
       tr.innerHTML =
-        '<td><span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span></td>" +
-        '<td class="col-buying"><a class="share-link" href="' + shareHref(base, code, amount, buying, "buying") + '">' +
-          formatCurrency(buying, code) +
+        '<td><a class="share-link" href="' + shareHref(base, code, amount, buying, costBase) + '">' +
+          '<span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span>" +
         "</a></td>" +
-        '<td class="col-cost"><a class="share-link" href="' + shareHref(code, base, amount, costBase, "cost") + '">' +
-          '<div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
-          '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div>" +
-        "</a></td>";
+        '<td class="col-buying">' + formatCurrency(buying, code) + "</td>" +
+        '<td class="col-cost"><div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
+        '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div></td>";
       tbody.appendChild(tr);
     });
   }
@@ -475,24 +472,27 @@ function xmlToJson(xml) {
   // show someone exactly what was shared with them.
   function parseShareParams() {
     var p = new URLSearchParams(location.search);
-    if (!p.has("amount") || !p.has("from") || !p.has("to") || !p.has("value") || !p.has("date")) return null;
+    if (!p.has("amount") || !p.has("from") || !p.has("to") || !p.has("buying") || !p.has("cost") || !p.has("date")) {
+      return null;
+    }
     return {
       amount: p.get("amount"),
       from: p.get("from"),
       to: p.get("to"),
-      value: parseFloat(p.get("value")),
-      date: p.get("date"),
-      kind: p.get("kind") === "cost" ? "cost" : "buying" // default covers older/malformed links
+      buying: parseFloat(p.get("buying")),
+      cost: parseFloat(p.get("cost")),
+      date: p.get("date")
     };
   }
 
   var shared = parseShareParams();
 
   if (shared) {
-    var verb = shared.kind === "cost" ? "costs" : "buys";
-    var pair =
-      formatCurrency(Number(shared.amount), shared.from) + " " + verb + " " + formatCurrency(shared.value, shared.to);
-    document.getElementById("snapshotPair").textContent = pair;
+    // mirrors the row it came from: both facts, same as the table shows them
+    var buyingLine = formatCurrency(Number(shared.amount), shared.from) + " buys " + formatCurrency(shared.buying, shared.to);
+    var costLine = formatCurrency(Number(shared.amount), shared.to) + " costs " + formatCurrency(shared.cost, shared.from);
+    document.getElementById("snapshotBuying").textContent = buyingLine;
+    document.getElementById("snapshotCost").textContent = costLine;
     document.getElementById("snapshotAsOf").textContent = "as of " + formatDateYMD(shared.date);
     document.getElementById("liveView").hidden = true;
     document.getElementById("snapshot").hidden = false;
