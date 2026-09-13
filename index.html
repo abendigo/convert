@@ -39,42 +39,50 @@
     <div class="page">
       <div class="wordmark">Convert</div>
 
-      <div
-        class="stage"
-        id="stage"
-        tabindex="0"
-        aria-label="Amount and base currency. Swipe or use arrow keys to change."
-      >
-        <div class="chev chev-left" aria-hidden="true">‹</div>
-        <div class="chev chev-right" aria-hidden="true">›</div>
-        <div class="chev chev-up" aria-hidden="true">︿</div>
-        <div class="chev chev-down" aria-hidden="true">﹀</div>
+      <div class="snapshot" id="snapshot" hidden>
+        <div class="pair" id="snapshotPair"></div>
+        <div class="as-of" id="snapshotAsOf"></div>
+        <a class="live-link" href="?">See live rates &rarr;</a>
+      </div>
 
-        <div class="hero-viewport" id="heroViewport">
-          <div class="hero" id="hero"></div>
+      <div id="liveView">
+        <div
+          class="stage"
+          id="stage"
+          tabindex="0"
+          aria-label="Amount and base currency. Swipe or use arrow keys to change."
+        >
+          <div class="chev chev-left" aria-hidden="true">‹</div>
+          <div class="chev chev-right" aria-hidden="true">›</div>
+          <div class="chev chev-up" aria-hidden="true">︿</div>
+          <div class="chev chev-down" aria-hidden="true">﹀</div>
+
+          <div class="hero-viewport" id="heroViewport">
+            <div class="hero" id="hero"></div>
+          </div>
         </div>
-      </div>
 
-      <div class="page-scroll">
-        <table class="rates">
-          <thead>
-            <tr>
-              <th>Currency</th>
-              <th>Buying power</th>
-              <th>Cost</th>
-            </tr>
-          </thead>
-          <tbody id="ratesBody"></tbody>
-        </table>
-      </div>
+        <div class="page-scroll">
+          <table class="rates">
+            <thead>
+              <tr>
+                <th>Currency</th>
+                <th>Buying power</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody id="ratesBody"></tbody>
+          </table>
+        </div>
 
-      <footer>
-        Rates from the
-        <a
-          href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
-          >European Central Bank</a
-        ><span id="asOf"></span>.
-      </footer>
+        <footer>
+          Rates from the
+          <a
+            href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html"
+            >European Central Bank</a
+          ><span id="asOf"></span>.
+        </footer>
+      </div>
     </div>
 
     <script type="module" src="src/app.js"></script>

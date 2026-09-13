@@ -77,15 +77,89 @@ as distinct values, converted between via one small function, not merged into on
   Grotesk pairing.
 - One accent color: a cobalt blue, a nod to the EU/ECB blue rather than an arbitrary
   brand color.
-- Dark mode follows system preference (`prefers-color-scheme`) — no manual toggle in the
-  real app. (The theme toggle in the interactive prototype is preview-only tooling for
-  reviewing both themes, not part of the actual design.)
+- Dark mode currently follows system preference (`prefers-color-scheme`) only. A manual
+  override is planned as part of Settings (below) — this hadn't actually been decided
+  when an earlier version of this doc claimed it had; correcting the record.
+
+## Settings
+
+A settings gear is now justified — three genuine, independent preferences have come up,
+past the "2-3 real settings" threshold that was blocking it:
+
+- **Theme**: Light / Dark / Use device setting — three-way, device as the default.
+- **Language**: "Use device language" as the default/top option, explicit list below —
+  same auto-with-override shape as theme, for consistency between the two.
+  - Translation surface is smaller than it looks: currency full names ("Canadian
+    Dollar") and number/currency formatting can lean on the browser's own
+    `Intl.DisplayNames` and locale-aware `toLocaleString` instead of a hand-maintained
+    dictionary per language. What actually needs hand translation is a short, fixed
+    list of UI strings ("Buying power", "Cost", "for", the footer's ECB attribution
+    sentence, a couple of `aria-label`s) — a plain JS object per locale, no i18n
+    library needed.
+- **Select currencies**: replaces the rejected favorites system (see Currency scope)
+  with a better home for the same underlying need. Because curation now lives in an
+  infrequently-opened settings screen instead of always-visible table chrome, the
+  problems that killed favorites don't apply here — no need for a max-count cap or an
+  eviction rule; whatever's checked in settings directly *is* the rotation list swipe
+  and tap already operate on, no separate favorites-vs-catalog split.
+
+Not designed yet: how the settings screen is presented (likely a simple overlay, no
+router/framework needed) and where the gear icon lives visually.
+
+**Possible future settings, not committed — noted so "settings" doesn't quietly become
+a junk drawer later.** Raised while brainstorming, no design work done:
+- Default starting amount (currently always opens at 100)
+- A rate margin/fee percentage on top of the raw ECB rate, to match what a user's own
+  bank/exchange actually charges
+- A rounding preference coarser than the currency's own convention (`Intl` already
+  handles per-currency decimals correctly, e.g. no cents shown for JPY)
+- Haptic feedback on the swipe gesture, where supported
+
+Two ideas that came up in the same conversation but are **features, not settings** —
+they change what the app *does*, not how it behaves, so they don't belong in this
+screen even if built: rate history/trend, and sharing a conversion (see below).
+
+## Sharing
+
+Explored as a possible growth lever, with expectations kept honest: this isn't a
+Wordle-style vanity share (nobody shares a currency conversion as an achievement) — the
+realistic trigger is someone mid-decision wanting to send an actual number to whoever
+they're deciding with. Built accordingly:
+
+- **What's shared**: each currency's name in the table is a real `<a>` link to that
+  specific base→target conversion, not a custom gesture. Long-press on it gets the
+  native OS share sheet **for free** — no gesture-detection code, no taught hint needed,
+  because it's just how browsers already treat any link. A normal tap still selects that
+  row as base as before (`preventDefault`'d so it doesn't navigate); long-press bypasses
+  our JS entirely at the OS level, so both behaviors coexist on the same element.
+- **Values are static, not live**: the actual computed value is baked into the URL
+  itself (`?amount=100&from=CAD&to=USD&value=73.47&date=2026-09-13`), not just the
+  inputs to a recalculation. Whoever opens the link — a day or a year later — sees
+  exactly what was shared. The alternative (recalculating live on open) risks the
+  number in the link preview/text not matching what's on the page, which breaks trust
+  fast.
+- **Date format is `y/m/d`, deliberately not a locale format.** A shared link leaves
+  its original context — `03/04/2026` means different dates in the US vs. nearly
+  everywhere else, but year-first is unambiguous to everyone even if it's nobody's
+  native format.
+- **The landing page for a shared link is a distinct snapshot view**, not the live
+  interactive tool: the frozen pair, clearly dated "as of", with an explicit "See live
+  rates" handoff into the real app. Keeps the frozen fact honest (never mistaken for
+  current) while still funneling into actual product usage.
+- **Link previews (what shows in iMessage/WhatsApp/Slack before anyone clicks) are not
+  solved by the above alone.** Those clients read static `<meta>` tags from the raw
+  HTML response without running JavaScript, so a purely static/client-side page can't
+  show the actual shared numbers in the preview card — it would show the same generic
+  card for every link. That needs a small serverless function to read the URL's query
+  params server-side and write real `<meta>` tags per request (title showing the actual
+  numbers; static app icon as the image — decided against a fully rendered image card
+  for now, that's more machinery than the value clearly earns yet). **Not yet built** —
+  natural fit for a small Cloudflare Worker/Pages Function, which ties back into the
+  hosting-consolidation option raised earlier (the ECB proxy already lives on
+  Cloudflare).
 
 ## Explicitly out of scope
 
-- **Settings gear** — deferred. Only one candidate setting has come up (curating the
-  currency list) — not enough to justify a menu. Revisit once there are genuinely 2-3
-  settings, and consider surfacing a single setting directly rather than behind a gear.
 - **Help icon** — rejected. Undercuts the "gestures teach themselves" approach; if the
   hint animation isn't sufficient, the fix is a better hint, not an escape hatch next to
   it. Accessibility (screen reader / keyboard users) should be handled via proper

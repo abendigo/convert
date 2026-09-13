@@ -77,6 +77,27 @@ function xmlToJson(xml) {
   var ratesEUR = {}; // filled once the ECB feed resolves (or from cache)
   var date = null;
 
+  function formatDateYMD(iso) {
+    // ECB's date is already YYYY-MM-DD; y/m/d (not a locale format) is
+    // deliberate here — this leaves its original context when shared, and
+    // year-first reads unambiguously everywhere, unlike d/m/y vs m/d/y
+    return iso.replace(/-/g, "/");
+  }
+
+  // a shared link freezes the actual computed value into the URL, not just
+  // the inputs — so whoever opens it later sees exactly what was shared,
+  // never a different (live-recalculated) number
+  function shareHref(fromCode, toCode, amt, value) {
+    var params = new URLSearchParams({
+      amount: amt,
+      from: fromCode,
+      to: toCode,
+      value: value.toFixed(2),
+      date: date
+    });
+    return location.pathname + "?" + params.toString();
+  }
+
   // all 10 rotate via swipe; [0] is base
   var currencies = Object.keys(names);
   var amount = 100;
@@ -170,7 +191,9 @@ function xmlToJson(xml) {
       var tr = document.createElement("tr");
       tr.dataset.code = code;
       tr.innerHTML =
-        '<td><span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span></td>" +
+        '<td><a class="cur-link" href="' + shareHref(base, code, amount, buying) + '">' +
+          '<span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span>" +
+        "</a></td>" +
         '<td class="col-buying">' + formatCurrency(buying, code) + "</td>" +
         '<td class="col-cost"><div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
         '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div></td>";
@@ -207,6 +230,11 @@ function xmlToJson(xml) {
   }
 
   tbody.addEventListener("click", function (e) {
+    // a normal tap still selects the base (don't navigate the real link
+    // away); a long-press bypasses this entirely — the OS intercepts it
+    // before any click ever fires, showing its native share menu instead
+    var link = e.target.closest("a.cur-link");
+    if (link) e.preventDefault();
     var tr = e.target.closest("tr");
     if (tr && tr.dataset.code) selectBase(tr.dataset.code);
   });
@@ -436,39 +464,65 @@ function xmlToJson(xml) {
     }
   });
 
-  // ---- data: cached rates first (instant paint), then the live ECB feed ----
-
-  var cachedRates = cacheGet("rates");
-  var cachedDate = cacheGet("date");
-  if (cachedRates) {
-    ratesEUR = cachedRates;
-    date = cachedDate;
-    render();
+  // ---- shared-link snapshot: a frozen fact, not the live tool ----
+  // Everything the snapshot needs is already in the URL, so when one is
+  // present, skip the cache/fetch flow entirely — no network dependency to
+  // show someone exactly what was shared with them.
+  function parseShareParams() {
+    var p = new URLSearchParams(location.search);
+    if (!p.has("amount") || !p.has("from") || !p.has("to") || !p.has("value") || !p.has("date")) return null;
+    return {
+      amount: p.get("amount"),
+      from: p.get("from"),
+      to: p.get("to"),
+      value: parseFloat(p.get("value")),
+      date: p.get("date")
+    };
   }
 
-  fetch(ECB_PROXY_URL)
-    .then(function (response) {
-      return response.text();
-    })
-    .then(function (xmlString) {
-      return new DOMParser().parseFromString(xmlString, "text/xml");
-    })
-    .then(function (xmlNode) {
-      return xmlToJson(xmlNode);
-    })
-    .then(function (json) {
-      var data = json["gesmes:Envelope"].Cube.Cube;
-      date = data["@attributes"].time;
+  var shared = parseShareParams();
 
-      var fetched = {};
-      data.Cube.forEach(function (item) {
-        var attrs = item["@attributes"];
-        if (names[attrs.currency]) fetched[attrs.currency] = parseFloat(attrs.rate);
-      });
-      ratesEUR = fetched;
+  if (shared) {
+    var pair = formatCurrency(Number(shared.amount), shared.from) + " = " + formatCurrency(shared.value, shared.to);
+    document.getElementById("snapshotPair").textContent = pair;
+    document.getElementById("snapshotAsOf").textContent = "as of " + formatDateYMD(shared.date);
+    document.getElementById("liveView").hidden = true;
+    document.getElementById("snapshot").hidden = false;
+  } else {
+    // ---- data: cached rates first (instant paint), then the live ECB feed ----
 
-      cacheSet("rates", ratesEUR);
-      cacheSet("date", date);
+    var cachedRates = cacheGet("rates");
+    var cachedDate = cacheGet("date");
+    if (cachedRates) {
+      ratesEUR = cachedRates;
+      date = cachedDate;
       render();
-    });
+    }
+
+    fetch(ECB_PROXY_URL)
+      .then(function (response) {
+        return response.text();
+      })
+      .then(function (xmlString) {
+        return new DOMParser().parseFromString(xmlString, "text/xml");
+      })
+      .then(function (xmlNode) {
+        return xmlToJson(xmlNode);
+      })
+      .then(function (json) {
+        var data = json["gesmes:Envelope"].Cube.Cube;
+        date = data["@attributes"].time;
+
+        var fetched = {};
+        data.Cube.forEach(function (item) {
+          var attrs = item["@attributes"];
+          if (names[attrs.currency]) fetched[attrs.currency] = parseFloat(attrs.rate);
+        });
+        ratesEUR = fetched;
+
+        cacheSet("rates", ratesEUR);
+        cacheSet("date", date);
+        render();
+      });
+  }
 })();
