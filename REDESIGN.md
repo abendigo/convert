@@ -105,9 +105,15 @@ as distinct values, converted between via one small function, not merged into on
   build (`npm run build` → `polymer build`) needs to change — likely no build command
   at all. Vite is a fine option later purely for local dev-server convenience, not
   required.
-- **Keep** `idb-keyval` (local caching of rates/date) and the service worker (PWA
-  offline support) — though its `TrustedWebActivity`-specific framing is now stale
-  since the app isn't targeting the Play Store.
+- **No `idb-keyval`.** Originally kept for local caching of rates/date, but it imports
+  via a bare module specifier (`import ... from "idb-keyval"`), which only resolved
+  because Polymer's old build step rewrote it — with no build step, the browser can't
+  resolve it at all, and the whole module fails to load silently (this is what caused
+  the "blank currency list" bug on first deploy: nothing in `app.js` ran). Caching two
+  small values doesn't need a library — swapped for plain `localStorage`.
+- **Keep** the service worker (PWA offline support) — though its
+  `TrustedWebActivity`-specific framing is now stale since the app isn't targeting the
+  Play Store.
 - **Data source unchanged**: ECB reference-rates XML via the existing Cloudflare Worker
   proxy (`https://red-band-e7de.pokerdiary.workers.dev/`), which lives outside this repo.
 - **No tests for now.** If added later: Playwright (not Cypress — preference for

@@ -1,4 +1,20 @@
-import { get, set } from "idb-keyval";
+// tiny local cache — just two small values (rates, date), so plain
+// localStorage covers it without pulling in a library
+function cacheGet(key) {
+  try {
+    var raw = localStorage.getItem("convert:" + key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null; // storage unavailable (private mode, etc.) — non-fatal
+  }
+}
+function cacheSet(key, value) {
+  try {
+    localStorage.setItem("convert:" + key, JSON.stringify(value));
+  } catch (e) {
+    /* non-fatal — just skip caching */
+  }
+}
 
 // Copied from https://gist.github.com/chinchang/8106a82c56ad007e27b1
 function xmlToJson(xml) {
@@ -422,11 +438,13 @@ function xmlToJson(xml) {
 
   // ---- data: cached rates first (instant paint), then the live ECB feed ----
 
-  Promise.all([get("rates"), get("date")]).then(function (cached) {
-    if (cached[0]) ratesEUR = cached[0];
-    if (cached[1]) date = cached[1];
-    if (cached[0]) render();
-  });
+  var cachedRates = cacheGet("rates");
+  var cachedDate = cacheGet("date");
+  if (cachedRates) {
+    ratesEUR = cachedRates;
+    date = cachedDate;
+    render();
+  }
 
   fetch(ECB_PROXY_URL)
     .then(function (response) {
@@ -449,8 +467,8 @@ function xmlToJson(xml) {
       });
       ratesEUR = fetched;
 
-      set("rates", ratesEUR);
-      set("date", date);
+      cacheSet("rates", ratesEUR);
+      cacheSet("date", date);
       render();
     });
 })();
