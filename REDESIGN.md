@@ -3,6 +3,55 @@
 Working notes from the redesign discussion, before implementation starts. Interactive
 prototype: https://claude.ai/code/artifact/bd8066f9-adfe-4ccf-852b-742c56e802cf
 
+## Domain name
+
+**Decision: `enkelkurs.com`** (and `.app`, both confirmed available and worth
+registering together). "Enkel kurs" is Swedish for "simple rate" — `kurs` is the
+Swedish/Norwegian/Danish word for a financial rate/quote specifically (as in
+*växelkurs*/*valutakurs*, "exchange rate") — not `ränta`, which would mean *interest*
+rate instead, a distinction that mattered.
+
+Directions tried and ruled out, briefly, so this doesn't get re-litigated from
+scratch later:
+- **Generic English words** ("convert", "exchange", "rate") — every short, clean
+  variant across every TLD tried (`.app`, `.com`, `.io`, `.co`, `.money`, `.exchange`)
+  is already registered. `.exchange` as a TLD is especially saturated (it exists
+  specifically for currency/crypto exchanges).
+- **`swipefx` / `simplefx`** — both taken, and specifically by forex/crypto trading
+  platforms, one of them scam-flagged. Beyond just being unavailable, "fx" as a suffix
+  is effectively colonized by leveraged trading generally — margin, live execution,
+  broker accounts — none of which this app is or should imply. This is why the final
+  name avoids "fx" entirely in favor of the more accurate "kurs" (a rate/quote, not a
+  tradeable instrument).
+- **"Simple Currency"/"SimpleCurrency"** — already the name of at least three unrelated
+  currency-converter apps (App Store, Google Play, GitHub); weak on distinctiveness
+  even where a domain was technically free.
+- **"Dead simple fx"** — `deadsimplefx.com` was genuinely available, but "dead" as an
+  intensifier ("dead simple" = very simple) is an English-only idiom that doesn't
+  translate — and more importantly, death-adjacent words are actively avoided around
+  money/finance specifically in Chinese culture (same root superstition as avoiding the
+  number 4), which lands badly on a money app given the currency list already includes
+  a Singapore-market currency (SGD).
+- **`camb.io`** and other foreign currency-exchange words (`cambio`, `divisa`,
+  `valuta`, `wechsel`) — all taken across `.app`/`.io`/`.co`, several parked for resale
+  rather than in active use.
+- **`.to`** (as in `enkel.to`, playing on "convert enkel-TO-another-currency") — genuinely
+  available, but meaningfully more expensive long-term (~$60-100/year vs. ~$10-20 for
+  `.com`/`.app`) and carries a real quirk: updating registrant contact info can trigger
+  a forced additional 2-year renewal charge. `.to` also has a loose-content reputation
+  (torrent/piracy sites) by association, not a hard restriction but a soft one. Not
+  worth the premium once the name itself didn't need the pun to work.
+
+**Verification method, worth recording since it went wrong once:** RDAP via
+`rdap.org` is reliable for `.app`/`.com`/`.money` (specific, detailed responses either
+way), but its bootstrap for `.io` is broken — it returns the same generic
+"No RDAP service is available" error regardless of actual status, even for domains
+confirmed registered by other means. Several domains were incorrectly reported as
+available early in the search because of this. Real `whois` (the CLI, with the
+correct registry-specific host — `whois.registry.co` for `.co`, `whois.nic.io` for
+`.io`, not the outdated `whois.nic.co`) caught and corrected the error. Cross-check
+`.io`/`.co` results against `whois` before trusting them.
+
 ## Philosophy
 
 The app stays "as simple as possible" and mobile-first. Sparse is intentional, not a gap —
@@ -88,7 +137,10 @@ past the "2-3 real settings" threshold that was blocking it:
 
 - **Theme**: Light / Dark / Use device setting — three-way, device as the default.
 - **Language**: "Use device language" as the default/top option, explicit list below —
-  same auto-with-override shape as theme, for consistency between the two.
+  same auto-with-override shape as theme, for consistency between the two. **Swedish
+  must be in the initial language list, not added later** — the domain name and the
+  translated wordmark are both Swedish in origin (see below), so shipping translations
+  without Swedish included would be an odd gap in the app's own naming logic.
   - Translation surface is smaller than it looks: currency full names ("Canadian
     Dollar") and number/currency formatting can lean on the browser's own
     `Intl.DisplayNames` and locale-aware `toLocaleString` instead of a hand-maintained
@@ -96,6 +148,18 @@ past the "2-3 real settings" threshold that was blocking it:
     list of UI strings ("Buying power", "Cost", "for", the footer's ECB attribution
     sentence, a couple of `aria-label`s) — a plain JS object per locale, no i18n
     library needed.
+  - **The wordmark itself translates too** — not just UI labels. The app's name is a
+    description ("Simple Rates" in English), not an arbitrary proper noun, so it's
+    just one more entry in the same per-locale dictionary: English shows "Simple
+    Rates," a Swedish visitor sees "Enkel Kurs" (the domain's own language) by default,
+    etc. The domain (`enkelkurs.com`, see Domain name below) is the one name that
+    never changes and anchors identity across languages — the on-screen wordmark is
+    allowed to shift because the URL doesn't. Extend the same translation to the page
+    `<title>` and the PWA manifest name, not just the visible wordmark, so the browser
+    tab and "Add to Home Screen" prompt match what's on screen. Needs real
+    native-speaker translation per language, not machine translation run once — a
+    literal/mechanical translation is exactly what broke "dead simple" earlier in this
+    doc, and this string matters more than most since it's the brand.
 - **Select currencies**: replaces the rejected favorites system (see Currency scope)
   with a better home for the same underlying need. Because curation now lives in an
   infrequently-opened settings screen instead of always-visible table chrome, the
