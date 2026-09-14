@@ -228,6 +228,18 @@ they're deciding with. Built accordingly:
   hosting-consolidation option raised earlier (the ECB proxy already lives on
   Cloudflare).
 
+**Idea, not a goal yet: an affiliate link to a currency exchange service** (Wise,
+Revolut, XE, etc.) on the snapshot page specifically — someone clicking through to one
+frozen conversion is a real signal of intent, unlike the main swipe screen, which
+should stay exactly as clean as it is now. The real tension, if this ever gets picked
+up: this is a money app whose whole value is "trustworthy numbers, no agenda," and a
+financial incentive tied to where someone sends money — even one that never touches the
+ECB data — invites reasonable doubt about the numbers themselves. Non-negotiable if
+pursued: clear, honest "affiliate/sponsored" disclosure, both for legal reasons (FTC/EU
+requirements) and because quietly hiding it would contradict the whole "nothing
+hidden" ethos this app runs on. Real affiliate programs also typically require an
+application/approval, not just dropping in a link.
+
 ## Explicitly out of scope
 
 - **Help icon** — rejected. Undercuts the "gestures teach themselves" approach; if the
