@@ -245,10 +245,30 @@ they're deciding with. Built accordingly:
   it — the working prototype is plain JS/CSS. Drop `lit-element`.
 - **No Polymer toolchain.** Drop `polymer-cli`, `polyserve`, `polymer.json` — Polymer's
   been dead as a project for years, and it only existed to serve Lit.
-- **No bundler required.** Static files, served as-is by Netlify. `netlify.toml`'s
-  build (`npm run build` → `polymer build`) needs to change — likely no build command
-  at all. Vite is a fine option later purely for local dev-server convenience, not
-  required.
+- **No bundler required.** Static files, served as-is. Vite is a fine option later
+  purely for local dev-server convenience, not required.
+- **Hosting: migrated from Netlify to Cloudflare Pages**, at `enkelkurs.com`, once the
+  domain was settled. This was the consolidation raised earlier in this doc — the ECB
+  proxy Worker turned out to already be in the same Cloudflare account (confirmed via
+  the account's `workers.dev` subdomain matching the proxy's own subdomain), so site +
+  proxy now share one account instead of two platforms. Deploys via GitHub Actions
+  (`.github/workflows/deploy.yml`, `wrangler pages deploy` on push to `master`), not
+  Cloudflare's own git integration — that needs an interactive OAuth authorization this
+  setup couldn't do headlessly, so a plain Actions workflow does the same job.
+  `netlify.toml` removed; Netlify site itself needs deleting/disconnecting separately
+  in its own dashboard (no API access to it from here).
+  - Cloudflare Pages custom domains need an explicit CNAME record even within the same
+    account — it's not automatic. Apex-domain CNAME (`enkelkurs.com` → `enkelkurs.pages.dev`)
+    only works because Cloudflare supports CNAME flattening at the zone apex; this
+    would need an A record instead on any non-Cloudflare DNS.
+  - Gotcha hit while setting this up: `wrangler pages project create` (no flags) has
+    been folded into a newer "Workers with static assets" model in recent wrangler
+    versions, which scaffolds a `wrangler.jsonc`/local `node_modules`/`deploy` npm
+    script into the repo — conflicting with the "no build tooling" decision above, and
+    at one point tried to upload `node_modules` itself as a deployable asset (a 148MB
+    file, well over the 25MB limit). Fixed by using `--force` on project creation
+    (keeps it as classic Pages) and running `wrangler pages deploy` directly, from
+    outside the repo directory, without ever letting it write config into the repo.
 - **No `idb-keyval`.** Originally kept for local caching of rates/date, but it imports
   via a bare module specifier (`import ... from "idb-keyval"`), which only resolved
   because Polymer's old build step rewrote it — with no build step, the browser can't
