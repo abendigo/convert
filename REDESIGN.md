@@ -148,18 +148,22 @@ past the "2-3 real settings" threshold that was blocking it:
     list of UI strings ("Buying power", "Cost", "for", the footer's ECB attribution
     sentence, a couple of `aria-label`s) — a plain JS object per locale, no i18n
     library needed.
-  - **The wordmark itself translates too** — not just UI labels. The app's name is a
-    description ("Simple Rates" in English), not an arbitrary proper noun, so it's
-    just one more entry in the same per-locale dictionary: English shows "Simple
-    Rates," a Swedish visitor sees "Enkel Kurs" (the domain's own language) by default,
-    etc. The domain (`enkelkurs.com`, see Domain name below) is the one name that
-    never changes and anchors identity across languages — the on-screen wordmark is
-    allowed to shift because the URL doesn't. Extend the same translation to the page
-    `<title>` and the PWA manifest name, not just the visible wordmark, so the browser
-    tab and "Add to Home Screen" prompt match what's on screen. Needs real
-    native-speaker translation per language, not machine translation run once — a
-    literal/mechanical translation is exactly what broke "dead simple" earlier in this
-    doc, and this string matters more than most since it's the brand.
+  - **The wordmark carries a translated description too** — not just UI labels, and
+    not by fully swapping the name. The on-screen wordmark is "Enkel Kurs
+    (description)," where "Enkel Kurs" itself never changes — it stays fixed in every
+    locale, same as the domain (`enkelkurs.com`, see Domain name below) — and only the
+    parenthetical translates: "Enkel Kurs (Simple Rates)" in English, "Enkel Kurs
+    (Taux simple)" in French, etc. This replaces an earlier plan to fully swap the
+    wordmark per locale (English showing bare "Simple Rates," Swedish showing bare
+    "Enkel Kurs," nothing shared between them) — keeping "Enkel Kurs" fixed anchors
+    identity the same way the URL does, so the brand name is recognizable across
+    languages instead of looking like a different app per locale. Extend the same
+    pattern to the page `<title>` and the PWA manifest name, not just the visible
+    wordmark, so the browser tab and "Add to Home Screen" prompt match what's on
+    screen. Needs real native-speaker translation per language, not machine
+    translation run once — a literal/mechanical translation is exactly what broke
+    "dead simple" earlier in this doc, and this string matters more than most since
+    it's the brand.
 - **Select currencies**: replaces the rejected favorites system (see Currency scope)
   with a better home for the same underlying need. Because curation now lives in an
   infrequently-opened settings screen instead of always-visible table chrome, the

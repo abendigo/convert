@@ -1,6 +1,6 @@
 {
-  "name": "Simple Currency Converter",
-  "short_name": "Convert",
+  "name": "Enkel Kurs (Simple Rates)",
+  "short_name": "Enkel Kurs",
   "icons": [
     {
       "src": "images/manifest/icon-192x192.png",
