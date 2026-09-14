@@ -251,8 +251,17 @@ application/approval, not just dropping in a link.
   it. Accessibility (screen reader / keyboard users) should be handled via proper
   `aria-label`s, not a visible help affordance.
 - **Privacy / about pages** — not needed. Not distributed via Play Store (no store
-  requirement), no accounts, no analytics (Taplytics was removed previously), no data
-  collection beyond rates cached locally in IndexedDB on-device.
+  requirement), no account system. Analytics: self-hosted Umami (pageview-only,
+  cookieless, no PII) — see below. Otherwise no data collection beyond rates cached
+  locally in IndexedDB on-device.
+
+## Analytics
+
+Self-hosted Umami at `https://analytics.oosterveld.org` (same instance used by
+freeroll.org and myfriendsboat), embedded as a plain `<script>` tag in `index.html`
+with a hardcoded `data-website-id` — no build step or env vars here, and the website
+ID isn't secret (it's visible in every Umami site's public HTML anyway). Pageview
+tracking only for now; no custom events wired up yet.
 
 ## Implementation stack
 
@@ -271,8 +280,7 @@ application/approval, not just dropping in a link.
   (`.github/workflows/deploy.yml`, `wrangler pages deploy` on push to `master`), not
   Cloudflare's own git integration — that needs an interactive OAuth authorization this
   setup couldn't do headlessly, so a plain Actions workflow does the same job.
-  `netlify.toml` removed; Netlify site itself needs deleting/disconnecting separately
-  in its own dashboard (no API access to it from here).
+  `netlify.toml` removed; old Netlify site deleted/disconnected in its dashboard too.
   - Cloudflare Pages custom domains need an explicit CNAME record even within the same
     account — it's not automatic. Apex-domain CNAME (`enkelkurs.com` → `enkelkurs.pages.dev`)
     only works because Cloudflare supports CNAME flattening at the zone apex; this
