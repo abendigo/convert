@@ -24,11 +24,6 @@ export var strings = {
       one: "{count} currency selected",
       other: "{count} currencies selected"
     },
-    theme: {
-      light: "Light",
-      dark: "Dark",
-      device: "Use device setting"
-    },
     currencySelected: {
       other: "{currency} selected"
     }
@@ -55,13 +50,6 @@ export var strings = {
     selectedCount: {
       one: "{count} valuta vald",
       other: "{count} valutor valda"
-    },
-    // "tema" is an ett-word (neuter) in Swedish, so the adjective takes the
-    // neuter -t ending — "ljust"/"mörkt", not "ljus"/"mörk".
-    theme: {
-      light: "Ljust",
-      dark: "Mörkt",
-      device: "Använd enhetens inställning"
     },
     // "vald"/"valt" agrees with the currency noun's own gender (see
     // CURRENCY_GENDER below) — common for most, neuter for "pund" (GBP).
@@ -95,13 +83,6 @@ export var strings = {
       many: "{count} عملة محددة",
       other: "{count} عملة محددة"
     },
-    // Agrees with "الوضع" (mode), masculine — the base adjective form
-    // needs no suffix here, unlike Russian's feminine "тема" below.
-    theme: {
-      light: "فاتح",
-      dark: "داكن",
-      device: "استخدام إعداد الجهاز"
-    },
     // All 10 currencies in this app's list happen to be masculine nouns in
     // Arabic (see CURRENCY_GENDER) — the feminine form exists here for
     // correctness if a feminine-noun currency (e.g. Turkish lira, "ليرة")
@@ -133,13 +114,6 @@ export var strings = {
       few: "{count} валюты выбрано",
       many: "{count} валют выбрано",
       other: "{count} валюты выбрано"
-    },
-    // Agrees with "тема" (theme), feminine — the -ая ending, unlike
-    // Arabic's masculine "الوضع" above or Swedish's neuter "tema".
-    theme: {
-      light: "Светлая",
-      dark: "Тёмная",
-      device: "Как в системе"
     },
     // masculine/feminine/neuter agreement with the currency noun's own
     // gender — see CURRENCY_GENDER below. Most currency nouns default
