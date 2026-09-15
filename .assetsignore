@@ -1,0 +1,12 @@
+.github
+.git
+tests
+playwright.config.js
+playwright-report
+test-results
+package.json
+package-lock.json
+.gitignore
+.editorconfig
+README.md
+node_modules
