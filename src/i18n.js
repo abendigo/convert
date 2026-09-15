@@ -1,6 +1,8 @@
 export var SUPPORTED_LOCALES = ["en", "sv"];
 export var DEFAULT_LOCALE = "en";
 
+// Currency full names and number formatting aren't translated here —
+// Intl.DisplayNames / toLocaleString handle those directly.
 export var strings = {
   en: {
     wordmarkDescription: "Simple Rates",
@@ -28,6 +30,9 @@ export var strings = {
     liveLink: "See live rates →"
   },
   sv: {
+    // "Enkel Kurs" is already Swedish; a translated parenthetical would be
+    // redundant in this locale (unlike en/fr/etc., where it's the wordmark's
+    // only translated part).
     wordmarkDescription: "",
     metaDescription:
       "En enkel valutaomvandlare baserad på Europeiska centralbankens referenskurser.",
@@ -54,6 +59,9 @@ export var strings = {
   }
 };
 
+// Walks the full ordered navigator.languages list, not just the single
+// top navigator.language value, so a user's second-ranked language still
+// matches when their first isn't supported.
 export function detectLocale(preferredLanguages) {
   var langs =
     preferredLanguages ||
