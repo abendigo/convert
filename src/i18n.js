@@ -1,4 +1,4 @@
-export var SUPPORTED_LOCALES = ["en", "sv"];
+export var SUPPORTED_LOCALES = ["en", "sv", "ar", "ru"];
 export var DEFAULT_LOCALE = "en";
 
 // Currency full names and number formatting aren't translated here —
@@ -40,6 +40,40 @@ export var strings = {
     footer: "Kurser från {ecbLink}",
     footerEcbName: "Europeiska centralbanken",
     liveLink: "Se aktuella kurser →"
+  },
+  ar: {
+    wordmarkDescription: "أسعار بسيطة",
+    metaDescription:
+      "محول عملات بسيط يستخدم أسعار الصرف المرجعية للبنك المركزي الأوروبي.",
+    stageAriaLabel:
+      "المبلغ والعملة الأساسية. اسحب أو استخدم مفاتيح الأسهم للتغيير.",
+    tableCurrency: "العملة",
+    tableBuyingPower: "القوة الشرائية",
+    tableCost: "التكلفة",
+    costOf: "مقابل {amount}",
+    buyingLine: "{given} يشتري {bought}",
+    costLine: "{given} يكلف {cost}",
+    asOf: "اعتبارًا من {date}",
+    footer: "أسعار الصرف من {ecbLink}",
+    footerEcbName: "البنك المركزي الأوروبي",
+    liveLink: "عرض الأسعار الحية ←"
+  },
+  ru: {
+    wordmarkDescription: "Простые курсы",
+    metaDescription:
+      "Простой конвертер валют на основе справочных курсов Европейского центрального банка.",
+    stageAriaLabel:
+      "Сумма и базовая валюта. Проведите пальцем или используйте клавиши со стрелками, чтобы изменить.",
+    tableCurrency: "Валюта",
+    tableBuyingPower: "Покупательная способность",
+    tableCost: "Стоимость",
+    costOf: "за {amount}",
+    buyingLine: "{given} покупает {bought}",
+    costLine: "{given} стоит {cost}",
+    asOf: "по состоянию на {date}",
+    footer: "Курсы от {ecbLink}",
+    footerEcbName: "Европейского центрального банка",
+    liveLink: "Смотреть текущие курсы →"
   }
 };
 
