@@ -187,6 +187,40 @@ export function format(locale, template, values) {
   return new IntlMessageFormat(template, locale).format(values);
 }
 
+// Isolates a value from the surrounding text's own direction — without
+// this, a Latin/numeral fragment (a formatted amount, a raw date) embedded
+// in an RTL sentence (Arabic) can visually reorder relative to the RTL
+// text around it. Applying it to every value unconditionally is safe: for
+// a value whose own direction already matches its surroundings (e.g. a
+// translated link's text), isolating it is a no-op — there's no case
+// where wrapping a value here should be skipped.
+function bdi(html) {
+  return "<bdi>" + html + "</bdi>";
+}
+function bdiText(str) {
+  return "⁦" + str + "⁩";
+}
+function mapValues(values, wrap) {
+  var out = {};
+  for (var key in values) {
+    if (Object.prototype.hasOwnProperty.call(values, key)) {
+      out[key] = wrap(values[key]);
+    }
+  }
+  return out;
+}
+
+// format() variants for the two DOM insertion points that actually need
+// isolation: building an HTML string for innerHTML, or plain text for
+// textContent (which can't parse an actual <bdi> tag, so it needs the
+// Unicode isolate-mark equivalent instead).
+export function formatHTML(locale, template, values) {
+  return format(locale, template, values ? mapValues(values, bdi) : values);
+}
+export function formatText(locale, template, values) {
+  return format(locale, template, values ? mapValues(values, bdiText) : values);
+}
+
 export function currencyName(locale, code) {
   try {
     return new Intl.DisplayNames([locale], { type: "currency" }).of(code);
