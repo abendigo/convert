@@ -4,6 +4,7 @@
   "license": "Unlicense",
   "scripts": {
     "start": "npx --yes serve .",
+    "build": "sh scripts/build.sh",
     "test": "playwright test"
   },
   "husky": {
