@@ -17,7 +17,7 @@ export var strings = {
     buyingLine: "{given} buys {bought}",
     costLine: "{given} costs {cost}",
     asOf: "as of {date}",
-    footerRatesFrom: "Rates from the",
+    footer: "Rates from the {ecbLink}",
     footerEcbName: "European Central Bank",
     liveLink: "See live rates →"
   },
@@ -37,7 +37,7 @@ export var strings = {
     buyingLine: "{given} köper {bought}",
     costLine: "{given} kostar {cost}",
     asOf: "per {date}",
-    footerRatesFrom: "Kurser från",
+    footer: "Kurser från {ecbLink}",
     footerEcbName: "Europeiska centralbanken",
     liveLink: "Se aktuella kurser →"
   }
