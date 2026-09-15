@@ -28,6 +28,9 @@ export var strings = {
       light: "Light",
       dark: "Dark",
       device: "Use device setting"
+    },
+    currencySelected: {
+      other: "{currency} selected"
     }
   },
   sv: {
@@ -59,6 +62,13 @@ export var strings = {
       light: "Ljust",
       dark: "Mörkt",
       device: "Använd enhetens inställning"
+    },
+    // "vald"/"valt" agrees with the currency noun's own gender (see
+    // CURRENCY_GENDER below) — common for most, neuter for "pund" (GBP).
+    currencySelected: {
+      common: "{currency} vald",
+      neuter: "{currency} valt",
+      other: "{currency} vald"
     }
   },
   ar: {
@@ -91,6 +101,15 @@ export var strings = {
       light: "فاتح",
       dark: "داكن",
       device: "استخدام إعداد الجهاز"
+    },
+    // All 10 currencies in this app's list happen to be masculine nouns in
+    // Arabic (see CURRENCY_GENDER) — the feminine form exists here for
+    // correctness if a feminine-noun currency (e.g. Turkish lira, "ليرة")
+    // is ever added, but nothing in the current list ever selects it.
+    currencySelected: {
+      masculine: "{currency} مُختار",
+      feminine: "{currency} مُختارة",
+      other: "{currency} مُختار"
     }
   },
   ru: {
@@ -121,7 +140,59 @@ export var strings = {
       light: "Светлая",
       dark: "Тёмная",
       device: "Как в системе"
+    },
+    // masculine/feminine/neuter agreement with the currency noun's own
+    // gender — see CURRENCY_GENDER below. Most currency nouns default
+    // masculine, but "иена" (JPY) is feminine and "песо" (MXN) is neuter.
+    currencySelected: {
+      masculine: "{currency} выбран",
+      feminine: "{currency} выбрана",
+      neuter: "{currency} выбрано",
+      other: "{currency} выбран"
     }
+  }
+};
+
+// Grammatical gender of each currency's noun in a given locale — needed
+// because, unlike plural category, there's no Intl API that can derive
+// gender from a value; it's a property of the specific word, not
+// something computable, so it has to be hand-curated per locale/currency.
+export var CURRENCY_GENDER = {
+  sv: {
+    CAD: "common",
+    USD: "common",
+    GBP: "neuter",
+    THB: "common",
+    AUD: "common",
+    JPY: "common",
+    CHF: "common",
+    SGD: "common",
+    NZD: "common",
+    MXN: "common"
+  },
+  ar: {
+    CAD: "masculine",
+    USD: "masculine",
+    GBP: "masculine",
+    THB: "masculine",
+    AUD: "masculine",
+    JPY: "masculine",
+    CHF: "masculine",
+    SGD: "masculine",
+    NZD: "masculine",
+    MXN: "masculine"
+  },
+  ru: {
+    CAD: "masculine",
+    USD: "masculine",
+    GBP: "masculine",
+    THB: "masculine",
+    AUD: "masculine",
+    JPY: "feminine",
+    CHF: "masculine",
+    SGD: "masculine",
+    NZD: "masculine",
+    MXN: "neuter"
   }
 };
 
@@ -160,6 +231,13 @@ export function interpolate(template, values) {
 export function pluralSelect(locale, count, forms) {
   var category = new Intl.PluralRules(locale).select(count);
   return forms[category] || forms.other;
+}
+
+export function genderSelect(locale, currencyCode, forms) {
+  var gender =
+    (CURRENCY_GENDER[locale] && CURRENCY_GENDER[locale][currencyCode]) ||
+    "other";
+  return forms[gender] || forms.other;
 }
 
 export function currencyName(locale, code) {
