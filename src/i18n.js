@@ -19,7 +19,11 @@ export var strings = {
     asOf: "as of {date}",
     footer: "Rates from the {ecbLink}",
     footerEcbName: "European Central Bank",
-    liveLink: "See live rates →"
+    liveLink: "See live rates →",
+    selectedCount: {
+      one: "{count} currency selected",
+      other: "{count} currencies selected"
+    }
   },
   sv: {
     // "Enkel Kurs" is already Swedish; a translated parenthetical would be
@@ -39,7 +43,11 @@ export var strings = {
     asOf: "per {date}",
     footer: "Kurser från {ecbLink}",
     footerEcbName: "Europeiska centralbanken",
-    liveLink: "Se aktuella kurser →"
+    liveLink: "Se aktuella kurser →",
+    selectedCount: {
+      one: "{count} valuta vald",
+      other: "{count} valutor valda"
+    }
   },
   ar: {
     wordmarkDescription: "أسعار بسيطة",
@@ -56,7 +64,15 @@ export var strings = {
     asOf: "اعتبارًا من {date}",
     footer: "أسعار الصرف من {ecbLink}",
     footerEcbName: "البنك المركزي الأوروبي",
-    liveLink: "عرض الأسعار الحية ←"
+    liveLink: "عرض الأسعار الحية ←",
+    selectedCount: {
+      zero: "{count} عملة محددة",
+      one: "عملة واحدة محددة",
+      two: "عملتان محددتان",
+      few: "{count} عملات محددة",
+      many: "{count} عملة محددة",
+      other: "{count} عملة محددة"
+    }
   },
   ru: {
     wordmarkDescription: "Простые курсы",
@@ -73,7 +89,13 @@ export var strings = {
     asOf: "по состоянию на {date}",
     footer: "Курсы от {ecbLink}",
     footerEcbName: "Европейского центрального банка",
-    liveLink: "Смотреть текущие курсы →"
+    liveLink: "Смотреть текущие курсы →",
+    selectedCount: {
+      one: "{count} валюта выбрана",
+      few: "{count} валюты выбрано",
+      many: "{count} валют выбрано",
+      other: "{count} валюты выбрано"
+    }
   }
 };
 
@@ -103,6 +125,15 @@ export function interpolate(template, values) {
   return template.replace(/\{(\w+)\}/g, function (match, key) {
     return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
   });
+}
+
+// forms is a map of CLDR plural category ("zero"/"one"/"two"/"few"/"many"/
+// "other") to a template string. Not every locale defines every category
+// (English only has one/other), so this always falls back to "other" —
+// every locale must define that one.
+export function pluralSelect(locale, count, forms) {
+  var category = new Intl.PluralRules(locale).select(count);
+  return forms[category] || forms.other;
 }
 
 export function currencyName(locale, code) {
