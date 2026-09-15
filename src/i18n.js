@@ -13,18 +13,10 @@ export var strings = {
     tableCurrency: "Currency",
     tableBuyingPower: "Buying power",
     tableCost: "Cost",
-    costOf: function (formattedAmount) {
-      return "for " + formattedAmount;
-    },
-    buyingLine: function (formattedGiven, formattedBought) {
-      return formattedGiven + " buys " + formattedBought;
-    },
-    costLine: function (formattedGiven, formattedCost) {
-      return formattedGiven + " costs " + formattedCost;
-    },
-    asOf: function (formattedDate) {
-      return "as of " + formattedDate;
-    },
+    costOf: "for {amount}",
+    buyingLine: "{given} buys {bought}",
+    costLine: "{given} costs {cost}",
+    asOf: "as of {date}",
     footerRatesFrom: "Rates from the",
     footerEcbName: "European Central Bank",
     liveLink: "See live rates →"
@@ -41,18 +33,10 @@ export var strings = {
     tableCurrency: "Valuta",
     tableBuyingPower: "Köpkraft",
     tableCost: "Kostnad",
-    costOf: function (formattedAmount) {
-      return "för " + formattedAmount;
-    },
-    buyingLine: function (formattedGiven, formattedBought) {
-      return formattedGiven + " köper " + formattedBought;
-    },
-    costLine: function (formattedGiven, formattedCost) {
-      return formattedGiven + " kostar " + formattedCost;
-    },
-    asOf: function (formattedDate) {
-      return "per " + formattedDate;
-    },
+    costOf: "för {amount}",
+    buyingLine: "{given} köper {bought}",
+    costLine: "{given} kostar {cost}",
+    asOf: "per {date}",
     footerRatesFrom: "Kurser från",
     footerEcbName: "Europeiska centralbanken",
     liveLink: "Se aktuella kurser →"
@@ -79,6 +63,12 @@ export function detectLocale(preferredLanguages) {
 
 export function t(locale) {
   return strings[locale] || strings[DEFAULT_LOCALE];
+}
+
+export function interpolate(template, values) {
+  return template.replace(/\{(\w+)\}/g, function (match, key) {
+    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
+  });
 }
 
 export function currencyName(locale, code) {
