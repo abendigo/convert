@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f5f6fa" />
     <meta
-      id="metaDescription"
+      data-i18n="[content]metaDescription"
       name="description"
       content="A simple currency converter using European Central Bank reference rates."
     />
@@ -33,7 +33,7 @@
     <script>
       // Load and register pre-caching Service Worker
       if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
+        window.addEventListener("load", function() {
           navigator.serviceWorker.register("service-worker.js", {
             scope: "/"
           });
@@ -46,14 +46,20 @@
     <div class="page">
       <div class="topbar">
         <div class="wordmark" id="wordmark">Enkel Kurs (Simple Rates)</div>
-        <nav class="lang-switcher" id="langSwitcher" aria-label="Language"></nav>
+        <nav
+          class="lang-switcher"
+          id="langSwitcher"
+          aria-label="Language"
+        ></nav>
       </div>
 
       <div class="snapshot" id="snapshot" hidden>
         <div class="pair" id="snapshotBuying"></div>
         <div class="pair" id="snapshotCost"></div>
         <div class="as-of" id="snapshotAsOf"></div>
-        <a class="live-link" href="?" id="liveLink">See live rates &rarr;</a>
+        <a class="live-link" href="?" id="liveLink" data-i18n="liveLink"
+          >See live rates &rarr;</a
+        >
       </div>
 
       <div id="liveView">
@@ -61,6 +67,7 @@
           class="stage"
           id="stage"
           tabindex="0"
+          data-i18n="[aria-label]stageAriaLabel"
           aria-label="Amount and base currency. Swipe or use arrow keys to change."
         >
           <div class="chev chev-left" aria-hidden="true">‹</div>
@@ -77,9 +84,9 @@
           <table class="rates">
             <thead>
               <tr>
-                <th id="thCurrency">Currency</th>
-                <th id="thBuyingPower">Buying power</th>
-                <th id="thCost">Cost</th>
+                <th data-i18n="tableCurrency">Currency</th>
+                <th data-i18n="tableBuyingPower">Buying power</th>
+                <th data-i18n="tableCost">Cost</th>
               </tr>
             </thead>
             <tbody id="ratesBody"></tbody>

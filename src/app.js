@@ -114,10 +114,6 @@ function xmlToJson(xml) {
   var tbody = document.getElementById("ratesBody");
   var wordmarkEl = document.getElementById("wordmark");
   var langSwitcherEl = document.getElementById("langSwitcher");
-  var metaDescriptionEl = document.getElementById("metaDescription");
-  var thCurrencyEl = document.getElementById("thCurrency");
-  var thBuyingPowerEl = document.getElementById("thBuyingPower");
-  var thCostEl = document.getElementById("thCost");
   var footerEl = document.getElementById("footer");
   var liveLinkEl = document.getElementById("liveLink");
 
@@ -157,21 +153,36 @@ function xmlToJson(xml) {
       : "Enkel Kurs";
   }
 
-  // everything that isn't re-derived by render()/renderSnapshot() on a
-  // locale change — title, meta tag, table headers, aria-label, wordmark
+  // Declarative wiring for static strings: an element marked
+  // data-i18n="key" gets its textContent set to t(locale)[key];
+  // data-i18n="[attr]key" sets that attribute instead (same bracket
+  // convention i18next's DOM plugins use). Adding a new translatable
+  // element is then just an HTML attribute + a dictionary key — no
+  // matching id/getElementById/assignment triplet to keep in sync by hand.
+  function applyDataI18n(root) {
+    var s = t(locale);
+    root.querySelectorAll("[data-i18n]").forEach(function(el) {
+      var spec = el.getAttribute("data-i18n");
+      var m = spec.match(/^\[([\w-]+)\](.+)$/);
+      if (m) {
+        el.setAttribute(m[1], s[m[2]]);
+      } else {
+        el.textContent = s[spec];
+      }
+    });
+  }
+
+  // Handled explicitly rather than via data-i18n: the wordmark isn't a
+  // straight key-to-text swap (it's "Enkel Kurs" + an optional
+  // parenthetical, per REDESIGN.md), and liveLinkEl's href is computed
+  // app state, not translated text.
   function applyStaticStrings() {
     var s = t(locale);
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
     document.title = wordmarkText(s);
-    if (metaDescriptionEl)
-      metaDescriptionEl.setAttribute("content", s.metaDescription);
     wordmarkEl.textContent = wordmarkText(s);
-    stage.setAttribute("aria-label", s.stageAriaLabel);
-    thCurrencyEl.textContent = s.tableCurrency;
-    thBuyingPowerEl.textContent = s.tableBuyingPower;
-    thCostEl.textContent = s.tableCost;
-    liveLinkEl.textContent = s.liveLink;
+    applyDataI18n(document.documentElement);
     // only lang, not the rest of the snapshot's query params (amount/from/
     // to/...) — carrying those over would make this link re-open the same
     // snapshot instead of the live view
