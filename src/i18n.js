@@ -32,8 +32,7 @@ export var strings = {
     buyingLine: "{given} buys {bought}",
     costLine: "{given} costs {cost}",
     asOf: "as of {date}",
-    footer: "Rates from the {ecbLink}, as of {date}",
-    footerEcbName: "European Central Bank",
+    footer: "Rates from the <link>European Central Bank</link>, as of {date}",
     liveLink: "See live rates →",
     selectedCount:
       "{count, plural, one {# currency selected} other {# currencies selected}}",
@@ -55,8 +54,7 @@ export var strings = {
     buyingLine: "{given} köper {bought}",
     costLine: "{given} kostar {cost}",
     asOf: "per {date}",
-    footer: "Kurser från {ecbLink}, per {date}",
-    footerEcbName: "Europeiska centralbanken",
+    footer: "Kurser från <link>Europeiska centralbanken</link>, per {date}",
     liveLink: "Se aktuella kurser →",
     selectedCount:
       "{count, plural, one {# valuta vald} other {# valutor valda}}",
@@ -78,8 +76,8 @@ export var strings = {
     buyingLine: "{given} يشتري {bought}",
     costLine: "{given} يكلف {cost}",
     asOf: "اعتبارًا من {date}",
-    footer: "أسعار الصرف من {ecbLink}، اعتبارًا من {date}",
-    footerEcbName: "البنك المركزي الأوروبي",
+    footer:
+      "أسعار الصرف من <link>البنك المركزي الأوروبي</link>، اعتبارًا من {date}",
     liveLink: "عرض الأسعار الحية ←",
     selectedCount:
       "{count, plural, zero {# عملة محددة} one {عملة واحدة محددة} two {عملتان محددتان} few {# عملات محددة} many {# عملة محددة} other {# عملة محددة}}",
@@ -103,8 +101,8 @@ export var strings = {
     buyingLine: "{given} покупает {bought}",
     costLine: "{given} стоит {cost}",
     asOf: "по состоянию на {date}",
-    footer: "Курсы от {ecbLink}, по состоянию на {date}",
-    footerEcbName: "Европейского центрального банка",
+    footer:
+      "Курсы от <link>Европейского центрального банка</link>, по состоянию на {date}",
     liveLink: "Смотреть текущие курсы →",
     selectedCount:
       "{count, plural, one {# валюта выбрана} few {# валюты выбрано} many {# валют выбрано} other {# валюты выбрано}}",
@@ -185,6 +183,44 @@ export function t(locale) {
 // since all three are just ICU MessageFormat argument types.
 export function format(locale, template, values) {
   return new IntlMessageFormat(template, locale).format(values);
+}
+
+// Isolates a value from the surrounding text's own direction — without
+// this, a Latin/numeral fragment (a formatted amount, a raw date) embedded
+// in an RTL sentence (Arabic) can visually reorder relative to the RTL
+// text around it. Applying it to every value unconditionally is safe: for
+// a value whose own direction already matches its surroundings (e.g. a
+// translated link's text), isolating it is a no-op — there's no case
+// where wrapping a value here should be skipped.
+function bdi(html) {
+  return "<bdi>" + html + "</bdi>";
+}
+function bdiText(str) {
+  return "⁦" + str + "⁩";
+}
+// A value can be a tag callback (ICU's <link>...</link> rich-text
+// syntax) rather than a plain string — that's formatting logic, not
+// content, so it passes through untouched rather than being isolated.
+function mapValues(values, wrap) {
+  var out = {};
+  for (var key in values) {
+    if (Object.prototype.hasOwnProperty.call(values, key)) {
+      var value = values[key];
+      out[key] = typeof value === "function" ? value : wrap(value);
+    }
+  }
+  return out;
+}
+
+// format() variants for the two DOM insertion points that actually need
+// isolation: building an HTML string for innerHTML, or plain text for
+// textContent (which can't parse an actual <bdi> tag, so it needs the
+// Unicode isolate-mark equivalent instead).
+export function formatHTML(locale, template, values) {
+  return format(locale, template, values ? mapValues(values, bdi) : values);
+}
+export function formatText(locale, template, values) {
+  return format(locale, template, values ? mapValues(values, bdiText) : values);
 }
 
 export function currencyName(locale, code) {

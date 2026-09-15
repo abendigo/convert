@@ -3,7 +3,8 @@ import {
   CURRENCY_CODES,
   detectLocale,
   t,
-  format,
+  formatHTML,
+  formatText,
   currencyName
 } from "./i18n.js";
 
@@ -131,20 +132,6 @@ function xmlToJson(xml) {
     }
   }
 
-  // isolates a fragment (a formatted amount, a raw date) from the
-  // surrounding text's own direction — without this, a Latin/numeral
-  // fragment embedded in an RTL sentence (Arabic) can visually reorder
-  // relative to the RTL text around it. Two forms because the two
-  // insertion points differ: innerHTML wants an actual <bdi> element,
-  // textContent wants the equivalent plain-text isolate marks (a literal
-  // "<bdi>" string wouldn't be parsed as a tag there).
-  function bdi(html) {
-    return "<bdi>" + html + "</bdi>";
-  }
-  function bdiText(str) {
-    return "⁦" + str + "⁩";
-  }
-
   // ---- i18n: static strings + the language switcher ----
 
   function wordmarkText(s) {
@@ -189,14 +176,18 @@ function xmlToJson(xml) {
     liveLinkEl.href = "?lang=" + locale;
   }
 
+  function ecbLink(chunks) {
+    return (
+      '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
+      chunks.join("") +
+      "</a>"
+    );
+  }
+
   function renderFooter() {
     var s = t(locale);
-    var ecbLink =
-      '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
-      s.footerEcbName +
-      "</a>";
     footerEl.innerHTML =
-      format(locale, s.footer, { ecbLink: ecbLink, date: bdi(date) }) + ".";
+      formatHTML(locale, s.footer, { link: ecbLink, date: date }) + ".";
   }
 
   // preserves any existing query params (e.g. a shared snapshot's) so
@@ -351,8 +342,8 @@ function xmlToJson(xml) {
         formatCurrency(costBase, base) +
         "</div>" +
         '<div class="cost-of">' +
-        format(locale, s.costOf, {
-          amount: bdi(formatCurrency(amount, code))
+        formatHTML(locale, s.costOf, {
+          amount: formatCurrency(amount, code)
         }) +
         "</div></td>";
       tbody.appendChild(tr);
@@ -658,21 +649,21 @@ function xmlToJson(xml) {
   // mirrors the row it came from: both facts, same as the table shows them
   function renderSnapshot() {
     var s = t(locale);
-    var buyingLine = format(locale, s.buyingLine, {
-      given: bdiText(formatCurrency(Number(shared.amount), shared.from)),
-      bought: bdiText(formatCurrency(shared.buying, shared.to))
+    var buyingLine = formatText(locale, s.buyingLine, {
+      given: formatCurrency(Number(shared.amount), shared.from),
+      bought: formatCurrency(shared.buying, shared.to)
     });
-    var costLine = format(locale, s.costLine, {
-      given: bdiText(formatCurrency(Number(shared.amount), shared.to)),
-      cost: bdiText(formatCurrency(shared.cost, shared.from))
+    var costLine = formatText(locale, s.costLine, {
+      given: formatCurrency(Number(shared.amount), shared.to),
+      cost: formatCurrency(shared.cost, shared.from)
     });
     document.getElementById("snapshotBuying").textContent = buyingLine;
     document.getElementById("snapshotCost").textContent = costLine;
-    document.getElementById("snapshotAsOf").textContent = format(
+    document.getElementById("snapshotAsOf").textContent = formatText(
       locale,
       s.asOf,
       {
-        date: bdiText(formatDateYMD(shared.date))
+        date: formatDateYMD(shared.date)
       }
     );
   }
