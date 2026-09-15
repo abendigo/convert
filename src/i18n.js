@@ -3,6 +3,19 @@ import IntlMessageFormat from "https://cdn.jsdelivr.net/npm/intl-messageformat@1
 export var SUPPORTED_LOCALES = ["en", "sv", "ar", "ru"];
 export var DEFAULT_LOCALE = "en";
 
+export var CURRENCY_CODES = [
+  "CAD",
+  "USD",
+  "GBP",
+  "THB",
+  "AUD",
+  "JPY",
+  "CHF",
+  "SGD",
+  "NZD",
+  "MXN"
+];
+
 // Currency full names and number formatting aren't translated here —
 // Intl.DisplayNames / toLocaleString handle those directly.
 export var strings = {
@@ -19,7 +32,7 @@ export var strings = {
     buyingLine: "{given} buys {bought}",
     costLine: "{given} costs {cost}",
     asOf: "as of {date}",
-    footer: "Rates from the {ecbLink}",
+    footer: "Rates from the {ecbLink}, as of {date}",
     footerEcbName: "European Central Bank",
     liveLink: "See live rates →",
     selectedCount:
@@ -42,7 +55,7 @@ export var strings = {
     buyingLine: "{given} köper {bought}",
     costLine: "{given} kostar {cost}",
     asOf: "per {date}",
-    footer: "Kurser från {ecbLink}",
+    footer: "Kurser från {ecbLink}, per {date}",
     footerEcbName: "Europeiska centralbanken",
     liveLink: "Se aktuella kurser →",
     selectedCount:
@@ -65,7 +78,7 @@ export var strings = {
     buyingLine: "{given} يشتري {bought}",
     costLine: "{given} يكلف {cost}",
     asOf: "اعتبارًا من {date}",
-    footer: "أسعار الصرف من {ecbLink}",
+    footer: "أسعار الصرف من {ecbLink}، اعتبارًا من {date}",
     footerEcbName: "البنك المركزي الأوروبي",
     liveLink: "عرض الأسعار الحية ←",
     selectedCount:
@@ -90,7 +103,7 @@ export var strings = {
     buyingLine: "{given} покупает {bought}",
     costLine: "{given} стоит {cost}",
     asOf: "по состоянию на {date}",
-    footer: "Курсы от {ecbLink}",
+    footer: "Курсы от {ecbLink}, по состоянию на {date}",
     footerEcbName: "Европейского центрального банка",
     liveLink: "Смотреть текущие курсы →",
     selectedCount:

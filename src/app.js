@@ -1,4 +1,11 @@
-import { SUPPORTED_LOCALES, detectLocale, t, format, currencyName } from "./i18n.js";
+import {
+  SUPPORTED_LOCALES,
+  CURRENCY_CODES,
+  detectLocale,
+  t,
+  format,
+  currencyName
+} from "./i18n.js";
 
 // tiny local cache — just two small values (rates, date), so plain
 // localStorage covers it without pulling in a library
@@ -34,11 +41,11 @@ function xmlToJson(xml) {
     obj = xml.nodeValue;
   }
 
-  var textNodes = [].slice.call(xml.childNodes).filter(function (node) {
+  var textNodes = [].slice.call(xml.childNodes).filter(function(node) {
     return node.nodeType === 3;
   });
   if (xml.hasChildNodes() && xml.childNodes.length === textNodes.length) {
-    obj = [].slice.call(xml.childNodes).reduce(function (text, node) {
+    obj = [].slice.call(xml.childNodes).reduce(function(text, node) {
       return text + node.nodeValue;
     }, "");
   } else if (xml.hasChildNodes()) {
@@ -60,10 +67,8 @@ function xmlToJson(xml) {
   return obj;
 }
 
-(function () {
+(function() {
   var ECB_PROXY_URL = "https://red-band-e7de.pokerdiary.workers.dev/";
-
-  var CURRENCY_CODES = ["CAD", "USD", "GBP", "THB", "AUD", "JPY", "CHF", "SGD", "NZD", "MXN"];
 
   var localeParam = new URLSearchParams(location.search).get("lang");
   var locale =
@@ -116,20 +121,40 @@ function xmlToJson(xml) {
   var footerEl = document.getElementById("footer");
   var liveLinkEl = document.getElementById("liveLink");
 
-  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
+    .matches;
 
   function formatCurrency(value, code) {
     try {
-      return value.toLocaleString(locale, { style: "currency", currency: code });
+      return value.toLocaleString(locale, {
+        style: "currency",
+        currency: code
+      });
     } catch (e) {
       return code + " " + value.toFixed(2);
     }
   }
 
+  // isolates a fragment (a formatted amount, a raw date) from the
+  // surrounding text's own direction — without this, a Latin/numeral
+  // fragment embedded in an RTL sentence (Arabic) can visually reorder
+  // relative to the RTL text around it. Two forms because the two
+  // insertion points differ: innerHTML wants an actual <bdi> element,
+  // textContent wants the equivalent plain-text isolate marks (a literal
+  // "<bdi>" string wouldn't be parsed as a tag there).
+  function bdi(html) {
+    return "<bdi>" + html + "</bdi>";
+  }
+  function bdiText(str) {
+    return "⁦" + str + "⁩";
+  }
+
   // ---- i18n: static strings + the language switcher ----
 
   function wordmarkText(s) {
-    return s.wordmarkDescription ? "Enkel Kurs (" + s.wordmarkDescription + ")" : "Enkel Kurs";
+    return s.wordmarkDescription
+      ? "Enkel Kurs (" + s.wordmarkDescription + ")"
+      : "Enkel Kurs";
   }
 
   // everything that isn't re-derived by render()/renderSnapshot() on a
@@ -139,7 +164,8 @@ function xmlToJson(xml) {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
     document.title = wordmarkText(s);
-    if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", s.metaDescription);
+    if (metaDescriptionEl)
+      metaDescriptionEl.setAttribute("content", s.metaDescription);
     wordmarkEl.textContent = wordmarkText(s);
     stage.setAttribute("aria-label", s.stageAriaLabel);
     thCurrencyEl.textContent = s.tableCurrency;
@@ -154,9 +180,8 @@ function xmlToJson(xml) {
       '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
       s.footerEcbName +
       "</a>";
-    var sentence = format(locale, s.footer, { ecbLink: ecbLink });
-    var asOfClause = date ? ", " + format(locale, s.asOf, { date: date }) : "";
-    footerEl.innerHTML = sentence + asOfClause + ".";
+    footerEl.innerHTML =
+      format(locale, s.footer, { ecbLink: ecbLink, date: bdi(date) }) + ".";
   }
 
   // preserves any existing query params (e.g. a shared snapshot's) so
@@ -168,17 +193,23 @@ function xmlToJson(xml) {
   }
 
   function renderLangSwitcher() {
-    langSwitcherEl.innerHTML = SUPPORTED_LOCALES.map(function (code) {
+    langSwitcherEl.innerHTML = SUPPORTED_LOCALES.map(function(code) {
       var current = code === locale;
       return (
-        '<a href="' + langHref(code) + '" data-lang="' + code + '"' +
+        '<a href="' +
+        langHref(code) +
+        '" data-lang="' +
+        code +
+        '"' +
         (current ? ' aria-current="true"' : "") +
-        ">" + code.toUpperCase() + "</a>"
+        ">" +
+        code.toUpperCase() +
+        "</a>"
       );
     }).join("");
   }
 
-  langSwitcherEl.addEventListener("click", function (e) {
+  langSwitcherEl.addEventListener("click", function(e) {
     var link = e.target.closest("a[data-lang]");
     if (!link) return;
     e.preventDefault();
@@ -190,7 +221,8 @@ function xmlToJson(xml) {
   // this same closure and this only ever runs from a later click, not
   // during initial script evaluation.
   function setLocale(newLocale) {
-    if (SUPPORTED_LOCALES.indexOf(newLocale) === -1 || newLocale === locale) return;
+    if (SUPPORTED_LOCALES.indexOf(newLocale) === -1 || newLocale === locale)
+      return;
     locale = newLocale;
     history.replaceState(null, "", langHref(locale));
     applyStaticStrings();
@@ -210,11 +242,19 @@ function xmlToJson(xml) {
     var formatted = formatCurrency(amt, code);
     var fs = fontSizeFor(formatted.length);
     return (
-      '<div class="amount-figure" style="font-size:' + fs + 'rem">' + formatted + "</div>" +
+      '<div class="amount-figure" style="font-size:' +
+      fs +
+      'rem">' +
+      formatted +
+      "</div>" +
       '<div class="currency-line">' +
-        '<span class="currency-code">' + code + "</span>" +
-        '<span class="currency-sep">·</span>' +
-        '<span class="currency-name">' + currencyName(locale, code) + "</span>" +
+      '<span class="currency-code">' +
+      code +
+      "</span>" +
+      '<span class="currency-sep">·</span>' +
+      '<span class="currency-name">' +
+      currencyName(locale, code) +
+      "</span>" +
       "</div>"
     );
   }
@@ -251,7 +291,9 @@ function xmlToJson(xml) {
 
   function commitStateReal(key, direction) {
     if (key === "x") {
-      amount = clampAmount(direction > 0 ? amount * 10 : Math.round(amount / 10));
+      amount = clampAmount(
+        direction > 0 ? amount * 10 : Math.round(amount / 10)
+      );
     } else if (direction > 0) {
       rotateLeft();
     } else {
@@ -262,11 +304,15 @@ function xmlToJson(xml) {
   // everything but the base, alphabetically
   function renderTable() {
     var base = currencies[0];
-    var others = currencies.filter(function (c) { return c !== base; }).sort();
+    var others = currencies
+      .filter(function(c) {
+        return c !== base;
+      })
+      .sort();
     var s = t(locale);
 
     tbody.innerHTML = "";
-    others.forEach(function (code) {
+    others.forEach(function(code) {
       var rate = ratesEUR[code] / ratesEUR[base];
       var buying = amount * rate;
       var costBase = amount / rate;
@@ -274,12 +320,26 @@ function xmlToJson(xml) {
       var tr = document.createElement("tr");
       tr.dataset.code = code;
       tr.innerHTML =
-        '<td><a class="share-link" href="' + shareHref(base, code, amount, buying, costBase) + '">' +
-          '<span class="cur-code">' + code + '</span><span class="cur-name">' + currencyName(locale, code) + "</span>" +
+        '<td><a class="share-link" href="' +
+        shareHref(base, code, amount, buying, costBase) +
+        '">' +
+        '<span class="cur-code">' +
+        code +
+        '</span><span class="cur-name">' +
+        currencyName(locale, code) +
+        "</span>" +
         "</a></td>" +
-        '<td class="col-buying">' + formatCurrency(buying, code) + "</td>" +
-        '<td class="col-cost"><div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
-        '<div class="cost-of">' + format(locale, s.costOf, { amount: formatCurrency(amount, code) }) + "</div></td>";
+        '<td class="col-buying">' +
+        formatCurrency(buying, code) +
+        "</td>" +
+        '<td class="col-cost"><div class="cost-value">' +
+        formatCurrency(costBase, base) +
+        "</div>" +
+        '<div class="cost-of">' +
+        format(locale, s.costOf, {
+          amount: bdi(formatCurrency(amount, code))
+        }) +
+        "</div></td>";
       tbody.appendChild(tr);
     });
   }
@@ -298,13 +358,13 @@ function xmlToJson(xml) {
     // a tap has no swipe direction to slide from, so cross-fade instead
     heroEl.style.transition = "opacity 120ms ease-in";
     heroEl.style.opacity = "0";
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       heroEl.innerHTML = heroInnerHTML(amount, currencies[0]);
       renderTable();
       heroEl.style.transition = "none";
       heroEl.style.opacity = "0";
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
           heroEl.style.transition = "opacity 160ms ease-out";
           heroEl.style.opacity = "1";
         });
@@ -312,7 +372,7 @@ function xmlToJson(xml) {
     }, 120);
   }
 
-  tbody.addEventListener("click", function (e) {
+  tbody.addEventListener("click", function(e) {
     // a normal tap still selects the base (don't navigate the real link
     // away); a long-press bypasses this entirely — the OS intercepts it
     // before any click ever fires, showing its native share menu instead
@@ -347,7 +407,9 @@ function xmlToJson(xml) {
     size = 0;
 
   function axisTranslate(key, px) {
-    return key === "x" ? "translateX(" + px + "px)" : "translateY(" + px + "px)";
+    return key === "x"
+      ? "translateX(" + px + "px)"
+      : "translateY(" + px + "px)";
   }
 
   // self-inverse: converts a visual direction to an action direction, and
@@ -394,7 +456,7 @@ function xmlToJson(xml) {
       outgoing.style.transform = axisTranslate(key, 0);
       incoming.style.transform = axisTranslate(key, -visualDirection * size);
     }
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       if (committed) {
         commitStateReal(key, semanticDirection);
         heroViewport.removeChild(outgoing);
@@ -420,7 +482,7 @@ function xmlToJson(xml) {
     if (reduceMotion) return;
     heroEl.style.transition = "transform 90ms ease-out";
     heroEl.style.transform = axisTranslate(key, direction * 10);
-    window.setTimeout(function () {
+    window.setTimeout(function() {
       heroEl.style.transition = "transform 140ms ease-out";
       heroEl.style.transform = "none";
     }, 90);
@@ -437,8 +499,8 @@ function xmlToJson(xml) {
       return;
     }
     beginSlidePreview(key, actionDirFor(key, actionDirection), actionDirection);
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
         finishSlide(true);
       });
     });
@@ -454,7 +516,7 @@ function xmlToJson(xml) {
     RESIST = 0.3,
     RESIST_MAX = 18;
 
-  stage.addEventListener("pointerdown", function (e) {
+  stage.addEventListener("pointerdown", function(e) {
     if (incomingEl) return;
     dragging = true;
     startX = e.clientX;
@@ -464,7 +526,7 @@ function xmlToJson(xml) {
     if (!reduceMotion) stage.setPointerCapture(e.pointerId);
   });
 
-  stage.addEventListener("pointermove", function (e) {
+  stage.addEventListener("pointermove", function(e) {
     if (!dragging || reduceMotion) return;
     var dx = e.clientX - startX,
       dy = e.clientY - startY;
@@ -486,7 +548,8 @@ function xmlToJson(xml) {
 
     if (blockedAxis) {
       var raw = blockedAxis === "x" ? dx : dy;
-      var resisted = (raw < 0 ? -1 : 1) * Math.min(RESIST_MAX, Math.abs(raw) * RESIST);
+      var resisted =
+        (raw < 0 ? -1 : 1) * Math.min(RESIST_MAX, Math.abs(raw) * RESIST);
       heroEl.style.transition = "none";
       heroEl.style.transform = axisTranslate(blockedAxis, resisted);
       return;
@@ -514,9 +577,11 @@ function xmlToJson(xml) {
         absY = Math.abs(dy);
       if (Math.max(absX, absY) <= THRESHOLD) return;
       if (absX > absY) {
-        if (wouldChange("x", dx > 0 ? 1 : -1)) instantCommit("x", dx > 0 ? 1 : -1);
+        if (wouldChange("x", dx > 0 ? 1 : -1))
+          instantCommit("x", dx > 0 ? 1 : -1);
       } else {
-        if (wouldChange("y", dy < 0 ? 1 : -1)) instantCommit("y", dy < 0 ? 1 : -1);
+        if (wouldChange("y", dy < 0 ? 1 : -1))
+          instantCommit("y", dy < 0 ? 1 : -1);
       }
       return;
     }
@@ -531,7 +596,7 @@ function xmlToJson(xml) {
   stage.addEventListener("pointerup", endDrag);
   stage.addEventListener("pointercancel", endDrag);
 
-  stage.addEventListener("keydown", function (e) {
+  stage.addEventListener("keydown", function(e) {
     if (e.key === "ArrowRight") {
       keySlide("x", 1);
       e.preventDefault();
@@ -553,7 +618,14 @@ function xmlToJson(xml) {
   // show someone exactly what was shared with them.
   function parseShareParams() {
     var p = new URLSearchParams(location.search);
-    if (!p.has("amount") || !p.has("from") || !p.has("to") || !p.has("buying") || !p.has("cost") || !p.has("date")) {
+    if (
+      !p.has("amount") ||
+      !p.has("from") ||
+      !p.has("to") ||
+      !p.has("buying") ||
+      !p.has("cost") ||
+      !p.has("date")
+    ) {
       return null;
     }
     return {
@@ -572,18 +644,22 @@ function xmlToJson(xml) {
   function renderSnapshot() {
     var s = t(locale);
     var buyingLine = format(locale, s.buyingLine, {
-      given: formatCurrency(Number(shared.amount), shared.from),
-      bought: formatCurrency(shared.buying, shared.to)
+      given: bdiText(formatCurrency(Number(shared.amount), shared.from)),
+      bought: bdiText(formatCurrency(shared.buying, shared.to))
     });
     var costLine = format(locale, s.costLine, {
-      given: formatCurrency(Number(shared.amount), shared.to),
-      cost: formatCurrency(shared.cost, shared.from)
+      given: bdiText(formatCurrency(Number(shared.amount), shared.to)),
+      cost: bdiText(formatCurrency(shared.cost, shared.from))
     });
     document.getElementById("snapshotBuying").textContent = buyingLine;
     document.getElementById("snapshotCost").textContent = costLine;
-    document.getElementById("snapshotAsOf").textContent = format(locale, s.asOf, {
-      date: formatDateYMD(shared.date)
-    });
+    document.getElementById("snapshotAsOf").textContent = format(
+      locale,
+      s.asOf,
+      {
+        date: bdiText(formatDateYMD(shared.date))
+      }
+    );
   }
 
   applyStaticStrings();
@@ -605,23 +681,24 @@ function xmlToJson(xml) {
     }
 
     fetch(ECB_PROXY_URL)
-      .then(function (response) {
+      .then(function(response) {
         return response.text();
       })
-      .then(function (xmlString) {
+      .then(function(xmlString) {
         return new DOMParser().parseFromString(xmlString, "text/xml");
       })
-      .then(function (xmlNode) {
+      .then(function(xmlNode) {
         return xmlToJson(xmlNode);
       })
-      .then(function (json) {
+      .then(function(json) {
         var data = json["gesmes:Envelope"].Cube.Cube;
         date = data["@attributes"].time;
 
         var fetched = {};
-        data.Cube.forEach(function (item) {
+        data.Cube.forEach(function(item) {
           var attrs = item["@attributes"];
-          if (CURRENCY_CODES.indexOf(attrs.currency) !== -1) fetched[attrs.currency] = parseFloat(attrs.rate);
+          if (CURRENCY_CODES.indexOf(attrs.currency) !== -1)
+            fetched[attrs.currency] = parseFloat(attrs.rate);
         });
         ratesEUR = fetched;
 
