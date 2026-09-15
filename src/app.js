@@ -1,3 +1,5 @@
+import { SUPPORTED_LOCALES, detectLocale, t, format, currencyName } from "./i18n.js";
+
 // tiny local cache — just two small values (rates, date), so plain
 // localStorage covers it without pulling in a library
 function cacheGet(key) {
@@ -61,18 +63,13 @@ function xmlToJson(xml) {
 (function () {
   var ECB_PROXY_URL = "https://red-band-e7de.pokerdiary.workers.dev/";
 
-  var names = {
-    CAD: "Canadian Dollar",
-    USD: "US Dollar",
-    GBP: "British Pound",
-    THB: "Thai Baht",
-    AUD: "Australian Dollar",
-    JPY: "Japanese Yen",
-    CHF: "Swiss Franc",
-    SGD: "Singapore Dollar",
-    NZD: "New Zealand Dollar",
-    MXN: "Mexican Peso"
-  };
+  var CURRENCY_CODES = ["CAD", "USD", "GBP", "THB", "AUD", "JPY", "CHF", "SGD", "NZD", "MXN"];
+
+  var localeParam = new URLSearchParams(location.search).get("lang");
+  var locale =
+    localeParam && SUPPORTED_LOCALES.indexOf(localeParam) !== -1
+      ? localeParam
+      : detectLocale();
 
   var ratesEUR = {}; // filled once the ECB feed resolves (or from cache)
   var date = null;
@@ -101,7 +98,7 @@ function xmlToJson(xml) {
   }
 
   // all 10 rotate via swipe; [0] is base
-  var currencies = Object.keys(names);
+  var currencies = CURRENCY_CODES.slice();
   var amount = 100;
   var MIN = 1,
     MAX = 100000;
@@ -110,15 +107,98 @@ function xmlToJson(xml) {
   var heroViewport = document.getElementById("heroViewport");
   var heroEl = document.getElementById("hero");
   var tbody = document.getElementById("ratesBody");
-  var asOfEl = document.getElementById("asOf");
+  var wordmarkEl = document.getElementById("wordmark");
+  var langSwitcherEl = document.getElementById("langSwitcher");
+  var metaDescriptionEl = document.getElementById("metaDescription");
+  var thCurrencyEl = document.getElementById("thCurrency");
+  var thBuyingPowerEl = document.getElementById("thBuyingPower");
+  var thCostEl = document.getElementById("thCost");
+  var footerEl = document.getElementById("footer");
+  var liveLinkEl = document.getElementById("liveLink");
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function formatCurrency(value, code) {
     try {
-      return value.toLocaleString("en-GB", { style: "currency", currency: code });
+      return value.toLocaleString(locale, { style: "currency", currency: code });
     } catch (e) {
       return code + " " + value.toFixed(2);
+    }
+  }
+
+  // ---- i18n: static strings + the language switcher ----
+
+  function wordmarkText(s) {
+    return s.wordmarkDescription ? "Enkel Kurs (" + s.wordmarkDescription + ")" : "Enkel Kurs";
+  }
+
+  // everything that isn't re-derived by render()/renderSnapshot() on a
+  // locale change — title, meta tag, table headers, aria-label, wordmark
+  function applyStaticStrings() {
+    var s = t(locale);
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+    document.title = wordmarkText(s);
+    if (metaDescriptionEl) metaDescriptionEl.setAttribute("content", s.metaDescription);
+    wordmarkEl.textContent = wordmarkText(s);
+    stage.setAttribute("aria-label", s.stageAriaLabel);
+    thCurrencyEl.textContent = s.tableCurrency;
+    thBuyingPowerEl.textContent = s.tableBuyingPower;
+    thCostEl.textContent = s.tableCost;
+    liveLinkEl.textContent = s.liveLink;
+  }
+
+  function renderFooter() {
+    var s = t(locale);
+    var ecbLink =
+      '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
+      s.footerEcbName +
+      "</a>";
+    var sentence = format(locale, s.footer, { ecbLink: ecbLink });
+    var asOfClause = date ? ", " + format(locale, s.asOf, { date: date }) : "";
+    footerEl.innerHTML = sentence + asOfClause + ".";
+  }
+
+  // preserves any existing query params (e.g. a shared snapshot's) so
+  // switching language from a shared link doesn't lose what was shared
+  function langHref(code) {
+    var params = new URLSearchParams(location.search);
+    params.set("lang", code);
+    return location.pathname + "?" + params.toString();
+  }
+
+  function renderLangSwitcher() {
+    langSwitcherEl.innerHTML = SUPPORTED_LOCALES.map(function (code) {
+      var current = code === locale;
+      return (
+        '<a href="' + langHref(code) + '" data-lang="' + code + '"' +
+        (current ? ' aria-current="true"' : "") +
+        ">" + code.toUpperCase() + "</a>"
+      );
+    }).join("");
+  }
+
+  langSwitcherEl.addEventListener("click", function (e) {
+    var link = e.target.closest("a[data-lang]");
+    if (!link) return;
+    e.preventDefault();
+    setLocale(link.dataset.lang);
+  });
+
+  // renderSnapshot() is defined further down, alongside the shared-link
+  // parsing it depends on — safe to reference here since both live in
+  // this same closure and this only ever runs from a later click, not
+  // during initial script evaluation.
+  function setLocale(newLocale) {
+    if (SUPPORTED_LOCALES.indexOf(newLocale) === -1 || newLocale === locale) return;
+    locale = newLocale;
+    history.replaceState(null, "", langHref(locale));
+    applyStaticStrings();
+    renderLangSwitcher();
+    if (shared) {
+      renderSnapshot();
+    } else {
+      render();
     }
   }
 
@@ -134,7 +214,7 @@ function xmlToJson(xml) {
       '<div class="currency-line">' +
         '<span class="currency-code">' + code + "</span>" +
         '<span class="currency-sep">·</span>' +
-        '<span class="currency-name">' + names[code] + "</span>" +
+        '<span class="currency-name">' + currencyName(locale, code) + "</span>" +
       "</div>"
     );
   }
@@ -183,6 +263,7 @@ function xmlToJson(xml) {
   function renderTable() {
     var base = currencies[0];
     var others = currencies.filter(function (c) { return c !== base; }).sort();
+    var s = t(locale);
 
     tbody.innerHTML = "";
     others.forEach(function (code) {
@@ -194,11 +275,11 @@ function xmlToJson(xml) {
       tr.dataset.code = code;
       tr.innerHTML =
         '<td><a class="share-link" href="' + shareHref(base, code, amount, buying, costBase) + '">' +
-          '<span class="cur-code">' + code + '</span><span class="cur-name">' + names[code] + "</span>" +
+          '<span class="cur-code">' + code + '</span><span class="cur-name">' + currencyName(locale, code) + "</span>" +
         "</a></td>" +
         '<td class="col-buying">' + formatCurrency(buying, code) + "</td>" +
         '<td class="col-cost"><div class="cost-value">' + formatCurrency(costBase, base) + "</div>" +
-        '<div class="cost-of">for ' + formatCurrency(amount, code) + "</div></td>";
+        '<div class="cost-of">' + format(locale, s.costOf, { amount: formatCurrency(amount, code) }) + "</div></td>";
       tbody.appendChild(tr);
     });
   }
@@ -244,7 +325,7 @@ function xmlToJson(xml) {
   function render() {
     heroEl.innerHTML = heroInnerHTML(amount, currencies[0]);
     renderTable();
-    asOfEl.textContent = date ? ", as of " + date : "";
+    renderFooter();
   }
 
   // ---- carousel-style slide: incoming panel always visible, sliding in
@@ -487,13 +568,29 @@ function xmlToJson(xml) {
 
   var shared = parseShareParams();
 
-  if (shared) {
-    // mirrors the row it came from: both facts, same as the table shows them
-    var buyingLine = formatCurrency(Number(shared.amount), shared.from) + " buys " + formatCurrency(shared.buying, shared.to);
-    var costLine = formatCurrency(Number(shared.amount), shared.to) + " costs " + formatCurrency(shared.cost, shared.from);
+  // mirrors the row it came from: both facts, same as the table shows them
+  function renderSnapshot() {
+    var s = t(locale);
+    var buyingLine = format(locale, s.buyingLine, {
+      given: formatCurrency(Number(shared.amount), shared.from),
+      bought: formatCurrency(shared.buying, shared.to)
+    });
+    var costLine = format(locale, s.costLine, {
+      given: formatCurrency(Number(shared.amount), shared.to),
+      cost: formatCurrency(shared.cost, shared.from)
+    });
     document.getElementById("snapshotBuying").textContent = buyingLine;
     document.getElementById("snapshotCost").textContent = costLine;
-    document.getElementById("snapshotAsOf").textContent = "as of " + formatDateYMD(shared.date);
+    document.getElementById("snapshotAsOf").textContent = format(locale, s.asOf, {
+      date: formatDateYMD(shared.date)
+    });
+  }
+
+  applyStaticStrings();
+  renderLangSwitcher();
+
+  if (shared) {
+    renderSnapshot();
     document.getElementById("liveView").hidden = true;
     document.getElementById("snapshot").hidden = false;
   } else {
@@ -524,7 +621,7 @@ function xmlToJson(xml) {
         var fetched = {};
         data.Cube.forEach(function (item) {
           var attrs = item["@attributes"];
-          if (names[attrs.currency]) fetched[attrs.currency] = parseFloat(attrs.rate);
+          if (CURRENCY_CODES.indexOf(attrs.currency) !== -1) fetched[attrs.currency] = parseFloat(attrs.rate);
         });
         ratesEUR = fetched;
 
