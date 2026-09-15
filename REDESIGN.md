@@ -8,11 +8,12 @@ prototype: https://claude.ai/code/artifact/bd8066f9-adfe-4ccf-852b-742c56e802cf
 **Decision: `enkelkurs.com`** (and `.app`, both confirmed available and worth
 registering together). "Enkel kurs" is Swedish for "simple rate" — `kurs` is the
 Swedish/Norwegian/Danish word for a financial rate/quote specifically (as in
-*växelkurs*/*valutakurs*, "exchange rate") — not `ränta`, which would mean *interest*
+_växelkurs_/_valutakurs_, "exchange rate") — not `ränta`, which would mean _interest_
 rate instead, a distinction that mattered.
 
 Directions tried and ruled out, briefly, so this doesn't get re-litigated from
 scratch later:
+
 - **Generic English words** ("convert", "exchange", "rate") — every short, clean
   variant across every TLD tried (`.app`, `.com`, `.io`, `.co`, `.money`, `.exchange`)
   is already registered. `.exchange` as a TLD is especially saturated (it exists
@@ -95,10 +96,10 @@ as distinct values, converted between via one small function, not merged into on
   lines read as redundant once combined felt natural).
 - Table is 3 columns: **Currency | Buying power | Cost** — replaces the original app's
   two separate (and redundant) tables for the same information.
-  - *Buying power* is a single bold figure — the question it answers ("100 CAD buys
-    ___") is constant across every row, already established by the card above.
-  - *Cost* is a bold figure **with a muted caption below stating what's being costed**
-    (e.g. "for 100 USD") — this question *does* vary per row (different target currency
+  - _Buying power_ is a single bold figure — the question it answers ("100 CAD buys
+    \_\_\_") is constant across every row, already established by the card above.
+  - _Cost_ is a bold figure **with a muted caption below stating what's being costed**
+    (e.g. "for 100 USD") — this question _does_ vary per row (different target currency
     each time), so it can't rely on a single shared header the way Buying power can.
   - Both columns' primary number sits on the same line/row-top, so they align — the
     caption is a trailing line under Cost, not a leading one above it.
@@ -168,7 +169,7 @@ past the "2-3 real settings" threshold that was blocking it:
   with a better home for the same underlying need. Because curation now lives in an
   infrequently-opened settings screen instead of always-visible table chrome, the
   problems that killed favorites don't apply here — no need for a max-count cap or an
-  eviction rule; whatever's checked in settings directly *is* the rotation list swipe
+  eviction rule; whatever's checked in settings directly _is_ the rotation list swipe
   and tap already operate on, no separate favorites-vs-catalog split.
 
 Not designed yet: how the settings screen is presented (likely a simple overlay, no
@@ -176,6 +177,7 @@ router/framework needed) and where the gear icon lives visually.
 
 **Possible future settings, not committed — noted so "settings" doesn't quietly become
 a junk drawer later.** Raised while brainstorming, no design work done:
+
 - Default starting amount (currently always opens at 100)
 - A rate margin/fee percentage on top of the raw ECB rate, to match what a user's own
   bank/exchange actually charges
@@ -184,7 +186,7 @@ a junk drawer later.** Raised while brainstorming, no design work done:
 - Haptic feedback on the swipe gesture, where supported
 
 Two ideas that came up in the same conversation but are **features, not settings** —
-they change what the app *does*, not how it behaves, so they don't belong in this
+they change what the app _does_, not how it behaves, so they don't belong in this
 screen even if built: rate history/trend, and sharing a conversion (see below).
 
 ## Sharing
@@ -195,7 +197,7 @@ realistic trigger is someone mid-decision wanting to send an actual number to wh
 they're deciding with. Built accordingly:
 
 - **What's shared**: one link per row, on the currency name (not a specific value cell)
-  — it mirrors the *whole row*, both facts together, exactly as the table shows them
+  — it mirrors the _whole row_, both facts together, exactly as the table shows them
   side by side, rather than cherry-picking one. The URL freezes both computed values
   (`buying` and `cost`), and the landing page renders two lines matching the row's own
   language: "100 CAD **buys** $73.47 USD" and "100 USD **costs** $136.11 CAD" — not a
@@ -270,8 +272,23 @@ tracking only for now; no custom events wired up yet.
   it — the working prototype is plain JS/CSS. Drop `lit-element`.
 - **No Polymer toolchain.** Drop `polymer-cli`, `polyserve`, `polymer.json` — Polymer's
   been dead as a project for years, and it only existed to serve Lit.
-- **No bundler required.** Static files, served as-is. Vite is a fine option later
-  purely for local dev-server convenience, not required.
+- **No bundler for the app itself** — plain JS/CSS/HTML, no transforms, no
+  transpiling, nothing minified. There is a `npm run build` step now (added once
+  `intl-messageformat` and Playwright existed and CI needed to deploy something
+  narrower than the whole repo root — see below), but it's a plain file-copy
+  script (`scripts/build.sh`), not a bundler: it exists to curate what gets
+  deployed, not to transform any code.
+  - **Why it exists**: `wrangler pages deploy` has no ignore-file mechanism of
+    its own (confirmed via `wrangler pages deploy --help` — no flag, no
+    `.assetsignore`/`.gitignore` support), so deploying the repo root directly
+    publishes every dev/CI file as a live static asset — this was actually
+    happening in production for a while (`.github/workflows/deploy.yml`,
+    `README.md`, `.editorconfig` were all publicly fetchable at `enkelkurs.com`,
+    discovered only once test files started showing up the same way). The
+    build script copies just `index.html`, `manifest.json`, `images/`, and
+    `src/` into a `build/` directory (already `.gitignore`d — pre-existing but
+    unused entry), and both `deploy.yml` and `pr-preview.yml` deploy that
+    instead of `.`.
 - **Hosting: migrated from Netlify to Cloudflare Pages**, at `enkelkurs.com`, once the
   domain was settled. This was the consolidation raised earlier in this doc — the ECB
   proxy Worker turned out to already be in the same Cloudflare account (confirmed via

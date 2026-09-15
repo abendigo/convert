@@ -3,7 +3,8 @@
   "repository": "abendigo/convert",
   "license": "Unlicense",
   "scripts": {
-    "start": "npx --yes serve ."
+    "start": "npx --yes serve .",
+    "build": "sh scripts/build.sh"
   },
   "husky": {
     "hooks": {

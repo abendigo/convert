@@ -1,6 +1,8 @@
 # Technology Choices
 
-- No framework — plain JS/CSS/HTML, no build step. Static files, served as-is.
+- No framework — plain JS/CSS/HTML, no bundler, no transforms. `npm run build`
+  exists, but it's a plain file-copy script that curates what gets deployed
+  (see REDESIGN.md), not a bundler.
 - Rates come from the [European Central Bank][ecb] daily reference rates, fetched
   client-side through a Cloudflare Worker proxy (works around the ECB endpoint not
   sending CORS headers). The worker lives in the same Cloudflare account as the site,
