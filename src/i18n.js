@@ -1,3 +1,5 @@
+import IntlMessageFormat from "https://cdn.jsdelivr.net/npm/intl-messageformat@12.0.0/+esm";
+
 export var SUPPORTED_LOCALES = ["en", "sv", "ar", "ru"];
 export var DEFAULT_LOCALE = "en";
 
@@ -20,13 +22,9 @@ export var strings = {
     footer: "Rates from the {ecbLink}",
     footerEcbName: "European Central Bank",
     liveLink: "See live rates →",
-    selectedCount: {
-      one: "{count} currency selected",
-      other: "{count} currencies selected"
-    },
-    currencySelected: {
-      other: "{currency} selected"
-    }
+    selectedCount:
+      "{count, plural, one {# currency selected} other {# currencies selected}}",
+    currencySelected: "{currency} selected"
   },
   sv: {
     // "Enkel Kurs" is already Swedish; a translated parenthetical would be
@@ -47,17 +45,12 @@ export var strings = {
     footer: "Kurser från {ecbLink}",
     footerEcbName: "Europeiska centralbanken",
     liveLink: "Se aktuella kurser →",
-    selectedCount: {
-      one: "{count} valuta vald",
-      other: "{count} valutor valda"
-    },
+    selectedCount:
+      "{count, plural, one {# valuta vald} other {# valutor valda}}",
     // "vald"/"valt" agrees with the currency noun's own gender (see
     // CURRENCY_GENDER below) — common for most, neuter for "pund" (GBP).
-    currencySelected: {
-      common: "{currency} vald",
-      neuter: "{currency} valt",
-      other: "{currency} vald"
-    }
+    currencySelected:
+      "{gender, select, common {{currency} vald} neuter {{currency} valt} other {{currency} vald}}"
   },
   ar: {
     wordmarkDescription: "أسعار بسيطة",
@@ -75,23 +68,14 @@ export var strings = {
     footer: "أسعار الصرف من {ecbLink}",
     footerEcbName: "البنك المركزي الأوروبي",
     liveLink: "عرض الأسعار الحية ←",
-    selectedCount: {
-      zero: "{count} عملة محددة",
-      one: "عملة واحدة محددة",
-      two: "عملتان محددتان",
-      few: "{count} عملات محددة",
-      many: "{count} عملة محددة",
-      other: "{count} عملة محددة"
-    },
+    selectedCount:
+      "{count, plural, zero {# عملة محددة} one {عملة واحدة محددة} two {عملتان محددتان} few {# عملات محددة} many {# عملة محددة} other {# عملة محددة}}",
     // All 10 currencies in this app's list happen to be masculine nouns in
-    // Arabic (see CURRENCY_GENDER) — the feminine form exists here for
+    // Arabic (see CURRENCY_GENDER) — the feminine branch exists here for
     // correctness if a feminine-noun currency (e.g. Turkish lira, "ليرة")
     // is ever added, but nothing in the current list ever selects it.
-    currencySelected: {
-      masculine: "{currency} مُختار",
-      feminine: "{currency} مُختارة",
-      other: "{currency} مُختار"
-    }
+    currencySelected:
+      "{gender, select, masculine {{currency} مُختار} feminine {{currency} مُختارة} other {{currency} مُختار}}"
   },
   ru: {
     wordmarkDescription: "Простые курсы",
@@ -109,28 +93,20 @@ export var strings = {
     footer: "Курсы от {ecbLink}",
     footerEcbName: "Европейского центрального банка",
     liveLink: "Смотреть текущие курсы →",
-    selectedCount: {
-      one: "{count} валюта выбрана",
-      few: "{count} валюты выбрано",
-      many: "{count} валют выбрано",
-      other: "{count} валюты выбрано"
-    },
+    selectedCount:
+      "{count, plural, one {# валюта выбрана} few {# валюты выбрано} many {# валют выбрано} other {# валюты выбрано}}",
     // masculine/feminine/neuter agreement with the currency noun's own
     // gender — see CURRENCY_GENDER below. Most currency nouns default
     // masculine, but "иена" (JPY) is feminine and "песо" (MXN) is neuter.
-    currencySelected: {
-      masculine: "{currency} выбран",
-      feminine: "{currency} выбрана",
-      neuter: "{currency} выбрано",
-      other: "{currency} выбран"
-    }
+    currencySelected:
+      "{gender, select, masculine {{currency} выбран} feminine {{currency} выбрана} neuter {{currency} выбрано} other {{currency} выбран}}"
   }
 };
 
 // Grammatical gender of each currency's noun in a given locale — needed
-// because, unlike plural category, there's no Intl API that can derive
-// gender from a value; it's a property of the specific word, not
-// something computable, so it has to be hand-curated per locale/currency.
+// because ICU's `select` argument still requires the caller to supply
+// which category applies; there's no Intl API that can derive gender from
+// a value the way Intl.PluralRules derives plural category from a number.
 export var CURRENCY_GENDER = {
   sv: {
     CAD: "common",
@@ -192,26 +168,10 @@ export function t(locale) {
   return strings[locale] || strings[DEFAULT_LOCALE];
 }
 
-export function interpolate(template, values) {
-  return template.replace(/\{(\w+)\}/g, function (match, key) {
-    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
-  });
-}
-
-// forms is a map of CLDR plural category ("zero"/"one"/"two"/"few"/"many"/
-// "other") to a template string. Not every locale defines every category
-// (English only has one/other), so this always falls back to "other" —
-// every locale must define that one.
-export function pluralSelect(locale, count, forms) {
-  var category = new Intl.PluralRules(locale).select(count);
-  return forms[category] || forms.other;
-}
-
-export function genderSelect(locale, currencyCode, forms) {
-  var gender =
-    (CURRENCY_GENDER[locale] && CURRENCY_GENDER[locale][currencyCode]) ||
-    "other";
-  return forms[gender] || forms.other;
+// Handles plain interpolation, plural, and gender select in one call,
+// since all three are just ICU MessageFormat argument types.
+export function format(locale, template, values) {
+  return new IntlMessageFormat(template, locale).format(values);
 }
 
 export function currencyName(locale, code) {
