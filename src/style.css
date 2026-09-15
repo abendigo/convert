@@ -34,7 +34,8 @@ body {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -178,6 +179,9 @@ body {
   animation: hintPulse 2.6s ease-in-out 0.5s 1;
   z-index: 2;
 }
+/* left/right (not logical start/end) deliberately: these hint at a swipe
+   gesture direction, which is a physical hand motion, not a reading
+   direction — they shouldn't flip under RTL the way text alignment does */
 .chev-left {
   left: 12px;
   top: 50%;
@@ -256,7 +260,7 @@ table.rates thead th {
   position: sticky;
   top: 0;
   background: var(--bg);
-  text-align: right;
+  text-align: end;
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -266,14 +270,14 @@ table.rates thead th {
   border-bottom: 1px solid var(--hairline);
 }
 table.rates thead th:first-child {
-  text-align: left;
+  text-align: start;
 }
 
 table.rates td {
   padding: 12px 0;
   border-bottom: 1px solid var(--hairline);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
   vertical-align: top;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.95rem;
@@ -288,7 +292,7 @@ table.rates tbody tr:active {
   background: var(--surface-2);
 }
 table.rates td:first-child {
-  text-align: left;
+  text-align: start;
   font-family: "IBM Plex Sans", sans-serif;
 }
 .share-link {
