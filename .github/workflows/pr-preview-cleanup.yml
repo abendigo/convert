@@ -3,6 +3,11 @@ name: PR Preview Cleanup
 on:
   pull_request:
     types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to clean up preview deployments for"
+        required: true
 
 permissions:
   contents: read
@@ -11,21 +16,21 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Delete preview deployments for this PR
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          BRANCH="pr-${{ github.event.number }}"
+          BRANCH="pr-${{ github.event.inputs.pr_number || github.event.number }}"
           # Each push to this PR created its own deployment record (Pages keeps
           # deployment history for rollback, unlike a Worker, which only ever
           # has one resource) — delete all of them, not just the latest.
           npx --yes wrangler pages deployment list --project-name=enkelkurs --json \
-            | jq -r --arg branch "$BRANCH" '.[] | select((. | tostring) | contains($branch)) | .id' \
+            | jq -r --arg branch "$BRANCH" '.[] | select(.Branch == $branch) | .Id' \
             | while read -r id; do
                 echo "Deleting deployment $id ($BRANCH)"
                 # || true: a deployment could already be gone (e.g. re-running
