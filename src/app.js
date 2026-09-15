@@ -176,14 +176,18 @@ function xmlToJson(xml) {
     liveLinkEl.href = "?lang=" + locale;
   }
 
+  function ecbLink(chunks) {
+    return (
+      '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
+      chunks.join("") +
+      "</a>"
+    );
+  }
+
   function renderFooter() {
     var s = t(locale);
-    var ecbLink =
-      '<a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html">' +
-      s.footerEcbName +
-      "</a>";
     footerEl.innerHTML =
-      formatHTML(locale, s.footer, { ecbLink: ecbLink, date: date }) + ".";
+      formatHTML(locale, s.footer, { link: ecbLink, date: date }) + ".";
   }
 
   // preserves any existing query params (e.g. a shared snapshot's) so
