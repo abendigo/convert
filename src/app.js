@@ -172,6 +172,10 @@ function xmlToJson(xml) {
     thBuyingPowerEl.textContent = s.tableBuyingPower;
     thCostEl.textContent = s.tableCost;
     liveLinkEl.textContent = s.liveLink;
+    // only lang, not the rest of the snapshot's query params (amount/from/
+    // to/...) — carrying those over would make this link re-open the same
+    // snapshot instead of the live view
+    liveLinkEl.href = "?lang=" + locale;
   }
 
   function renderFooter() {
